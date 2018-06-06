@@ -27,7 +27,9 @@ numel = t_sim/dt;
 %% Define initial position for the vehicles on each road
 % Aleatory intevehicular distance
 R1_xo = [ -150 -250 -100 ];
-R2_xo = [ -150 -250 -100 ];
+%R2_xo = [ -150 -250 -100 ]; 
+R2_xo = -300 + (300).*rand(1,3)% generates random values between -300 and 0
+% or just type out some random values
 %============== PRE-DEFINED VALUES =======================================
 %               MANUAL VEHICLE - Secondary Road                 
 %========================================================================
@@ -228,7 +230,8 @@ end
 %         %p=v1(i,j)*(i-tm_sr(j));
 %     end
 % end
-%% Define initial conditions
+%% CAV simulation 
+% Define initial conditions
 
 xo=R1_ini(2,:); % This is still the initial position to start before the control zone
 yo=R1_ini(3,:);
@@ -436,6 +439,7 @@ for n=1:t_sim
     
     line([0 400],[3.75 103.75],'color','k','LineWidth',2)
     line([0 430],[-4 103.75],'color','k','LineWidth',2)
+    %F(n) = getframe;
     grid on
     title('Vehicles Trajectory');
     drawnow
@@ -443,7 +447,7 @@ for n=1:t_sim
     M(n)=getframe;
 end
 
-figure
+
 axes('Position',[0 0 1500 1500])
 movie(M,1)
 
@@ -458,11 +462,27 @@ close(myVideo);
 
 
 % plots
-figure(3)
-time=[1:80];
-plot(time,v1)
-hold on;
-plot(time,v)
+figure(3) % discontinuous plot . for  every five count of time
+count=0;
+for n=1:t_sim
+    count=count+1;
+    hold on;
+     if(count==3)
+         pause(0.2)
+         %plot(x1(n),y1(n),'*') %
+         plot(n,v2(n,1),'.')
+         count=0;
+     end
+end
+figure(4) % continuous plot with pause 
+for n=1:t_sim
+         pause(0.2)
+         %plot(x1(n),y1(n),'*') %
+         plot(n,v2(n,1),'.')
+         hold on;
+end
+% hold on;
+% plot(time,v)
 xlabel('Time (seconds)')
 ylabel('velocity (m/s)')
 title('time Vs velocity with RSU')
