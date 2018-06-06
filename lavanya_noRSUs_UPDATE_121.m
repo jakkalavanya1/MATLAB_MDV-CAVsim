@@ -1,5 +1,7 @@
 
 % REV: LAVANYA  MAY 2018
+% 1) no RSU
+% 2) only one vehicle on each road colliding
 % MORE THAN ONE VEHICLE RUNNING SUCCESSFULLY(till now we just plotted MDVs
 % as CAVS) 
 %NEED TO ADD SAFE GAP CONSTRAING FOR MDVs

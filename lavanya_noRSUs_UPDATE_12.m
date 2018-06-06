@@ -1,8 +1,9 @@
 
 % REV: LAVANYA  MAY 2018
-% MORE THAN ONE VEHICLE RUNNING SUCCESSFULLY(till now we just plotted MDVs
-% as CAVS) 
-%NEED TO ADD SAFE GAP CONSTRAING FOR MDVs
+% 1) no  RSU one car on each road 
+% 2) CAV coded for one vehicle to go with predefined values without any
+% control
+
 % Writen by: Jackeline Rios-Torres based on Andreas Malikopoulos control
 % algorithm
 % This script allows visualizing the animation of vehicles on two merging
@@ -43,8 +44,8 @@ numel = t_sim/dt;
 
 %% Define initial position for the vehicles on each road
 % Aleatory intevehicular distance
-R1_xo = [ -150 ];
-R2_xo = [ -150 ];
+R1_xo = [ -150 -100 ];
+R2_xo = [ -150 -100];
 %============== PRE-DEFINED VALUES =======================================
 %               MANUAL VEHICLE - Secondary Road                 
 %========================================================================
