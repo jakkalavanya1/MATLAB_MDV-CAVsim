@@ -169,9 +169,9 @@ for i1=2:numel
                 xmf(i1,i2) = xmf(i1-1,i2); 
                 vmo(i1,i2) = vm(i1-1,i2);
                 
-                vmf(i1,i2) = vf_model(1,i2) % from distribution
+                vmf(i1,i2) = vf_model(1,i2); % from distribution
                 tmo(i1,i2) = tm(i1-1,i2);
-                tmf(i1,i2) = tmf(i1,i2-1) + iz_length/vmf(i1,i2-1);
+                tmf(i1,i2) = tmf(i1,i2-1)+ iz_length/vmf(i1,i2-1);
                 
                 % Calculate constants. If to is too close to tf, control
                 % signal will go to infinity, so, the control should be
@@ -468,7 +468,7 @@ for n=1:t_sim
     count=count+1;
     hold on;
      if(count==3)
-         pause(0.2)
+         pause(0.1)
          %plot(x1(n),y1(n),'*') %
          plot(n,v2(n,1),'.')
          count=0;
