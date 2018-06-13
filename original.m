@@ -43,8 +43,8 @@ numel = t_sim/dt;
 
 % Aleatory intevehicular distance
 
-R1_xo = [ -150 -125];
-R2_xo = [ -150 -125];
+R1_xo = [-125 -130];
+R2_xo = [-125 -200];
 
 
 %% Initial conditions for each vehicle
@@ -335,6 +335,7 @@ myVideo.Quality = 90;    % Default 75
 open(myVideo);
 writeVideo(myVideo, M);
 close(myVideo);
+
 
                     
                     

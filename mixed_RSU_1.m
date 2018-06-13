@@ -179,6 +179,15 @@ y=yo;
 v=vo;
 u=0*v;
 
+vf_gaussian=normrnd(v1_model(1,1),1)
+a_predict=(vf_gaussian^2-v1_model(1,1)^2)/(2*400); %500 is distance
+v2_predict=sqrt(v1_model(1,1).^2+2*a_predict*(100)) % vel at RSU2 predicted using acclf from gaussain
+tm_predict=2*(400)/(vf_gaussian+v1_model(1,1))   
+
+vf_newpredict= 12.5; % predict one value between 12 to 14
+error=v2_predict-v2_RSU2
+
+
 % Loop for the simulation time
 for i1=2:numel
     
@@ -194,7 +203,7 @@ for i1=2:numel
                 vo(i1,i2) = v(i1-1,i2); % We want vo to be constant until reaching the control zone
                 vf(i1,i2) = vf(i1-1,i2); % We want vf to be constant always
                 to(i1,i2) = i1-1; % We want to update to at each instant of time
-                tf(i1,i2) = tf(i1-1,i2); % We want tf to keep constant until we enter the control zone
+                tf(i1,i2) = tm_predict; % We want tf to keep constant until we enter the control zone
 
                 t(i1,i2)=i1*dt;
                 x(i1,i2) = x(i1-1,i2)+ vo(i1,i2)*dt; 
@@ -456,24 +465,50 @@ end % end for for loop of time
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
-x1= x(:,i4); % Secondary road
-y1= y(:,i4);
-u1= u(:,i4);
-v1= v(:,i4);
 
-x2=x(:,i5); % Main road
-y2=y(:,i5);      
-u2= u(:,i5);
-v2= v(:,i5);
-
-% Display results as animation
-figure(1) 
 for n=1:t_sim
-    %clf
-    plot(x2(n,:),y2(n,:),'or','MarkerSize',5, 'MarkerFaceColor','r' );
-    hold on
-    plot(x1(n,:),y1(n,:),'ob','MarkerSize',5,  'MarkerFaceColor','b');
-    hold off
+    j=1;
+    for k=1:length(i4)
+        if R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2
+            % it is CAV and on secondary road
+            x1(n)= x(n,i4(k)); % Secondary road
+            y1(n)= y(n,i4(k));
+            u1(n)= u(n,i4(k));
+            v1(n)= v(n,i4(k));
+            plot(x1(n),y1(n),'ob','MarkerSize',5, 'MarkerFaceColor','b' );
+            hold on;
+        end
+        if(R12_ini_h(8,i4(k)) == 4 && R12_ini_h(1,i4(k))==2)
+            % it is MDV and on secondary road
+            x2(n)= x(n,i4(k)); % Secondary road
+            y2(n)= y(n,i4(k));
+            u2(n)= u(n,i4(k));
+            v2(n)= v(n,i4(k));          
+            plot(x2(n),y2(n),'or','MarkerSize',5, 'MarkerFaceColor','r' );
+             hold on;
+        end
+
+        if R12_ini_h(8,i5(j)) == 3 && R12_ini_h(1,i5(j))==1 && j<=length(i5)
+            % it is CAV and on main road
+            x3(n)= x(n,i5(j)); % main road
+            y3(n)= y(n,i5(j));
+            u3(n)= u(n,i5(j));
+            v3(n)= v(n,i5(j));
+            plot(x3(n),y3(n),'ob','MarkerSize',5, 'MarkerFaceColor','b' );
+            hold on
+        end
+        if(R12_ini_h(8,i5(j)) == 4 && R12_ini_h(1,i5(j))==1) && j<=length(i5)
+            % it is MDV an on main road
+            x4(n)=x(n,i5(j)); % Main road
+            y4(n)=y(n,i5(j));      
+            u4(n)= u(n,i5(j));
+            v4(n)= v(n,i5(j));
+            plot(x4(n),y4(n),'or','MarkerSize',5,  'MarkerFaceColor','r');
+            hold off
+        end
+        j=j+1;
+    end
+   
     axis([0,600,-50,150]);
     xlabel('x (m)');
     ylabel('y (m)');
@@ -491,7 +526,7 @@ for n=1:t_sim
     pause(0.25)
     M(n)=getframe;
 end
-
+% Display results as animation
 figure
 axes('Position',[0 0 1500 1500])
 movie(M,1)
