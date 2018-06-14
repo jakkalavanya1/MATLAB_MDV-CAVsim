@@ -33,8 +33,8 @@ numel = t_sim/dt;
 
 %  intevehicular distance
 
-R1_xo = {[-125 -130],[3,4]}; % 3= CAV, 4= MANUAL
-R2_xo = {[ -125 -150],[3,4]};
+R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
+R2_xo = {[ -125 -130],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -142,8 +142,6 @@ R2_ini(8,:)=s2(2).r2;
 
 % Concatenate matrices
 R12_ini = horzcat(R1_ini, R2_ini); % Concatenate the two matrices 
-R12_ini_h = sortrows(R12_ini',7)'; % Ordering by time to reach intersection zone
-% R12_ini_h = sortrows(R12_ini',[2],{'descend'})';
 
 
 for i3=1:length(R12_ini_h(7,:))
@@ -152,15 +150,17 @@ for i3=1:length(R12_ini_h(7,:))
         % intersection for the first vehicle is the time it takes to cross 
         % the control zone at constant speed=vavg plus the time it takes 
         % to cross the intersection zone at constant speed = vmax
-        R12_ini_h(9,i3) = R12_ini_h(4,i3)./R12_ini_h(5,i3) +(iz_length)./R12_ini_h(6,i3);
+        R12_ini(9,i3) = R12_ini(4,i3)./R12_ini(5,i3) +(iz_length)./R12_ini(6,i3);
     else
         % For the rest of the vehicles it is the time to leave the
         % intersection of the previous vehicle, plus the time it takes to
         % cross the intersection zone at constant speed vmax
-        R12_ini_h(9,i3) = R12_ini_h(9,i3-1)+(iz_length)./R12_ini_h(6,i3);
+        R12_ini(9,i3) = R12_ini(9,i3-1)+(iz_length)./R12_ini(6,i3);
     end
 end
 
+R12_ini_h = sortrows(R12_ini',9)'; % Ordering by time to reach intersection zone
+% R12_ini_h = sortrows(R12_ini',[2],{'descend'})';
 
 %% Define initial conditions
 
@@ -170,8 +170,8 @@ xf=R12_ini_h(4,:);
 vo=R12_ini_h(5,:);
 vf=R12_ini_h(6,:);
 to=0.*R12_ini_h(2,:);
-tf=R12_ini_h(8,:);
-t2exit=R12_ini_h(8,:);
+tf=R12_ini_h(9,:);
+t2exit=R12_ini_h(9,:);
 t=zeros(1,length(tf));
 % State and control values for t=0
 x=xo;
@@ -364,13 +364,13 @@ for i1=2:numel
                 u(i1,i2) =-0.05;
                 flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
                 % rear end collision constraint ---------------
-                Ssafe = 10;
                 if(i2~=1)
+                if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1) || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2)
                     if x(i1,i2)-x(i1,i2-1)<Ssafe 
                         v(i1,i2)=v(i1,i2-1)-2;
                     end
                 end
-                    
+                end    
                 if x(i1,i2)>=0
                     xo(i1,i2) = x(i1,i2);
                     to(i1,i2) = t(i1,i2);
@@ -422,11 +422,12 @@ for i1=2:numel
                     v(i1,i2) = sqrt((vf(i1,i2)).^2-(2*u(i1,i2)*(430-xo(i1,i2))));
                     x(i1,i2) = xo(i1,i2)+v(i1,i2)*dt+(0.5*u(i1,i2)*dt^2);    
             % rear end collision constraint ---------------
-                    Ssafe = 10;
+                    if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1) || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2)
                     if(i2~=1)
                         if x(i1,i2)-x(i1,i2-1)<Ssafe 
                             v(i1,i2)=v(i1,i2-1)-2;
                         end
+                    end
                     end
                end
 
