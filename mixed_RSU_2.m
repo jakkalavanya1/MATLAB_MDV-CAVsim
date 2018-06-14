@@ -461,8 +461,17 @@ for i1=2:numel
             
         end % for loop of MDV or CAV
         end % for the if loop of main road
+    end
+end
+
+% Loop for the simulation time
+for i1=2:numel
+    
+    % Loop for each vehicle
+    for i2=1:length(R12_ini_h(1,:))
+
         if R12_ini_h(1,i2)==2 % if secondary road
-                       if R12_ini_h(2,i2)== 3 % if CAV
+            if R12_ini_h(2,i2)== 3 % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
 
