@@ -203,7 +203,7 @@ for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-        if R12_ini_h(2,i2)== 3 % if CAV
+        if R12_ini_h(8,i2)== 3 % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
 
@@ -356,7 +356,8 @@ for i1=2:numel
             else
                 y(i1,i2)=107.625;
             end
-        else % if MDV  ------------------------------------
+        end
+        if R12_ini_h(8,i2)==4 % if MDV  ------------------------------------
             if x(i1-1,i2)<0            
             % Update initial conditions:
                 xo(i1,i2) = x(i1-1,i2); % We want xo to be constant until reaching the control zone
