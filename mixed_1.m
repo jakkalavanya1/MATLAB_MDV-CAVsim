@@ -1,5 +1,10 @@
-% mixed traffic scenario
-% 2 CAVs and one MDV on each road
+% JUNE 2018
+% written by LAVANYA JAKKA based on the concept of 'Merging Assistant for
+% Mixed traffic'
+% This script allows visualizing the animation of vehicles on two merging
+% roads
+
+
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
  %%

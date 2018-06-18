@@ -2,6 +2,8 @@
 % 2 CAVs and one MDV on each road
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
+
+
  %%
 clear; 
 clear all
