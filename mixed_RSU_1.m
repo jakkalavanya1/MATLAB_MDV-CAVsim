@@ -1,7 +1,18 @@
-% mixed traffic scenario
-% 2 CAVs and one MDV on each road
-% need to add rear end collision constraint for manual vehicles
-% CAVs should sense rear end collision with MDV
+% JUNE 2018
+% written by LAVANYA JAKKA based on the concept of 'Merging Assistant for
+% Mixed traffic'
+% This script allows visualizing the animation of vehicles on two merging
+% roads
+
+% need to work on the following in future:
+% Collision of the vehicles to be avoided by incorporating merging assistant(Road Side Units)
+% the merging zone on other road (mixed_RSU_2.m)
+% the rear end collision constraint checks with previous vehicles with
+% other roads which should be constrained (mixed_RSU_2.m)
+% CAVs should sense rear end collision with MDV (mixed_RSU_2.m)
+% take care of collision, acceleration behaviours of vehicles 
+% check the condition on which the vehicles are arranged in order using
+% sortrows
  %%
 clear; 
 clear all
@@ -39,7 +50,6 @@ road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
 s2 = struct(road_2,R2_xo);
-
 
 % vehicles on main road
 % Identify main road as 1
@@ -114,7 +124,7 @@ cz_sr=400;
 cz_mr=400;
 a_CAV = 0;
 
-%% Initial conditions for each vehicle
+%% Initial conditions for each vehicle UPDATE
 
 % Vehicles on main road
 
