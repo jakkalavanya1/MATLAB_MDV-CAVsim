@@ -1,9 +1,7 @@
-% mixed traffic scenario
+% mixed traffic scenario-WORKING
 % 2 CAVs and one MDV on each road
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
-
-
  %%
 clear; 
 clear all
@@ -19,7 +17,7 @@ vmax_mr = 13.4112; % [m/s] ==> 30 MPH
 vmax_sr = 13.4112;   
 vavg_mr = 13.4112; % [m/s] ==> 30 MPH
 vavg_sr = 13.4112; % 30 MPH
-
+Ssafe = 10;
 vmin_mr = 0; % [m/s] 
 vmin_sr = 0;
 vmax = 30; 
@@ -35,14 +33,10 @@ numel = t_sim/dt;
 
 %  intevehicular distance
 
-<<<<<<< HEAD
+% R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
+% R2_xo = {[ -125 -130],[3,4]};
 R1_xo = {[-125 -130],[3,4]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -150],[3,4]};
-
-=======
-R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
-R2_xo = {[ -125 -130],[3,4]};
->>>>>>> f2c0379beb20ba0ecc174fda375f2c69f2723cda
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -305,7 +299,7 @@ for i1=2:numel
                     x(i1,i2) = a(i1,i2)*t(i1,i2)^3/6 + b(i1,i2)*t(i1,i2)^2/2 + c(i1,i2)*t(i1,i2) + d(i1,i2);
                     v(i1,i2) = a(i1,i2)*t(i1,i2)^2/2 + b(i1,i2)*t(i1,i2) + c(i1,i2);
                     u(i1,i2) = a(i1,i2)*t(i1,i2) + b(i1,i2);
-
+% EXPLAIN
                     if tf(i1,i2)-to(i1,i2)<= 2 && (v(i1,i2)> vf(1,i2) || v(i1,i2)< vf(1,i2))
                         v(i1,i2) = vf(1,i2);
                         u(i1,i2) = 0;
@@ -372,8 +366,10 @@ for i1=2:numel
                 u(i1,i2) =-0.05;
                 flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
                 % rear end collision constraint ---------------
-                if(i2~=1)
+                if(i2~=1) % i2 is number of vehicle
                 if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1) || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2)
+                    %if previous and current vehicle are on same road(main
+                    %road or secondary)
                     if x(i1,i2)-x(i1,i2-1)<Ssafe 
                         v(i1,i2)=v(i1,i2-1)-2;
                     end
