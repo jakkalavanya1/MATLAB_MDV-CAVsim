@@ -36,9 +36,14 @@ numel = t_sim/dt;
 %  intevehicular distance
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 R1_xo = {[-125 -130],[3,4]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -150],[3,4]};
 
+=======
+R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
+R2_xo = {[ -125 -130],[3,4]};
+>>>>>>> f2c0379beb20ba0ecc174fda375f2c69f2723cda
 =======
 R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -130],[3,4]};
