@@ -282,7 +282,7 @@ v2_predict=sqrt(v1_model(1,1).^2+2*a_predict*(100)) % vel at RSU2 predicted usin
 tm_predict=2*(400)/(vf_gaussian+v1_model(1,1))   
 
 vf_newpredict= 12.5; % predict one value between 12 to 14
-error=v2_predict-v2_RSU2
+error=v2_predict-v2_RSU2  % to check the correctness of the prediction of RSU 1
 
 for i1=2:numel
     for i2=1:length(R1_ini_h(2,:))        
