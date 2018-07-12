@@ -34,9 +34,9 @@ numel = t_sim/dt; % gives number of times the loop runs
 %% Define initial position for the vehicles on each road
 % R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL % error
 % R2_xo = {[ -125 -130],[3,4]};
-R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
-R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV, 4= MANUAL
+% R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
+% R2_xo = {[ -125 -150],[3,4]};
+R1_xo = {[-125 -130 ],[3,3]}; % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[ -125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
@@ -164,7 +164,7 @@ for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-%         if R12_ini_h(1,i2)==1 % if main road
+         if R12_ini_h(1,i2)==1 % if main road
             if R12_ini_h(8,i2)== 3 % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
@@ -175,7 +175,7 @@ for i1=2:numel
                 vo(i1,i2) = v(i1-1,i2); % We want vo to be constant until reaching the control zone
                 vf(i1,i2) = vf(i1-1,i2); % We want vf to be constant always
                 to(i1,i2) = i1-1; % We want to update to at each instant of time
-                tf(i1,i2) = tm_predict; % We want tf to keep constant until we enter the control zone
+                tf(i1,i2) = tf(i1-1,i2); % We want tf to keep constant until we enter the control zone
 
                 t(i1,i2)=i1*dt;
                 x(i1,i2) = x(i1-1,i2)+ vo(i1,i2)*dt; 
@@ -434,9 +434,289 @@ for i1=2:numel
             end       
             
         end % for loop of MDV or CAV
-%         end % for the if loop of main road
+         end % for the if loop of main road
      end
- end
+end
+ 
+%=========================================================
+%  Loop for the simulation time
+for i1=2:numel
+    
+    % Loop for each vehicle
+    for i2=1:length(R12_ini_h(1,:))
+
+        if R12_ini_h(1,i2)==2 % if secondary road
+            if R12_ini_h(2,i2)== 3 % if CAV
+            % Update variables before control zone 
+                if xm(i1-1,i2)<0
+
+                % Update initial conditions:
+                xmo(i1,i2) = xm(i1-1,i2); % We want xo to be constant until reaching the control zone
+                xmf(i1,i2) = xmf(i1-1,i2); % We want xf to be constant always
+                vmo(i1,i2) = vm(i1-1,i2); % We want vo to be constant until reaching the control zone
+                vmf(i1,i2) = vmf(i1-1,i2); % We want vf to be constant always
+                tmo(i1,i2) = i1-1; % We want to update to at each instant of time
+                tmf(i1,i2) = tf(i1-1,i2); % We want tf to keep constant until we enter the control zone
+
+                tm(i1,i2)=i1*dt;
+                xm(i1,i2) = xm(i1-1,i2)+ vmo(i1,i2)*dt; 
+                vm(i1,i2) = vmo(i1,i2);
+                um(i1,i2) = 0;
+                flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
+
+                if xm(i1,i2)>=0
+                    xmo(i1,i2) = xm(i1,i2);
+                    tmo(i1,i2) = tm(i1,i2);
+                    vmo(i1,i2) = vm(i1,i2);
+                end
+
+            end
+
+            % Update variables and control on the control zone
+            if xm(i1-1,i2)>=0 && xm(i1-1,i2)<=400
+
+                % Calculate control for first vehicle:
+                if i2==1
+
+                    % Update the initial conditions:
+                    xmo(i1,i2) = xm(i1-1,i2);
+                    xmf(i1,i2) = xmf(i1-1,i2);
+                    vmo(i1,i2) = vm(i1-1,i2);
+
+                    vmf(i1,i2) = vmf(i1-1,i2);
+                    tmo(i1,i2) = tm(i1-1,i2);
+                    tmf(i1,i2) = tmf(i1-1,i2);
+
+                    if tmf(i1,i2)-tmo(i1,i2)<= 2*dt
+                        a(i1,i2) = a(i1-1,i2);
+                        b(i1,i2) = b(i1-1,i2);
+                        c(i1,i2) = c(i1-1,i2);
+                        d(i1,i2) = d(i1-1,i2);
+                    else
+                        [a(i1,i2),b(i1,i2),c(i1,i2),d(i1,i2)]=RTControl(tmo(i1,i2),tmf(i1,i2),xmo(i1,i2),xmf(i1,i2),vmo(i1,i2),vmf(i1,i2));
+                    end
+
+
+                    % Update states and control
+                    tm(i1,i2)=i1*dt;
+                    xm(i1,i2) = a(i1,i2)*tm(i1,i2)^3/6 + b(i1,i2)*tm(i1,i2)^2/2 + c(i1,i2)*tm(i1,i2) + d(i1,i2);
+                    vm(i1,i2) = a(i1,i2)*tm(i1,i2)^2/2 + b(i1,i2)*tm(i1,i2) + c(i1,i2);
+                    um(i1,i2) = a(i1,i2)*tm(i1,i2) + b(i1,i2);
+
+                    % if the vehicle hit the lower bound on speed, don't apply 
+                    % control. Update states and initial conditions:
+                    if vm(i1,i2)<vmin_mr
+
+                        % Update states and control
+                        xm(i1,i2) = xm(i1-1,i2)+ vm(i1-1,i2)*dt;
+                        vm(i1,i2) = vm(i1-1,i2);
+                        um(i1,i2) = 0;
+                        flag(i1,i2) = 1;
+
+                        % Update initial conditions
+                        xmo(i1,i2) = xm(i1-1,i2);
+                        xmf(i1,i2) = xmf(i1-1,i2);
+                        vmo(i1,i2) = vm(i1-1,i2);
+                        vmf(i1,i2) = vmf(i1-1,i2);
+                        tmo(i1,i2) = tm(i1-1,i2);
+                        tmf(i1,i2) = tmf(i1-1,i2)-0.02;                  
+                    end
+
+
+                else % for the rest of the vehicles
+
+                    % Update the initial conditions
+                    xmo(i1,i2) = xm(i1-1,i2);
+                    xmf(i1,i2) = xmf(i1-1,i2);
+                    vmo(i1,i2) = vm(i1-1,i2);
+                    vmf(i1,i2) = vmf(i1-1,i2);
+                    tmo(i1,i2) = tm(i1-1,i2);
+                    tmf(i1,i2) = tmf(i1,i2-1) + iz_length/vmf(i1,i2-1);
+
+                    % Calculate constants. If to is too close to tf, control
+                    % signal will go to infinity, so, the control should be
+                    % stopped if the difference between the two is less than 3 seconds
+                    if tmf(i1,i2)-tmo(i1,i2)<= 2
+                        a(i1,i2) = a(i1-1,i2);
+                        b(i1,i2) = b(i1-1,i2);
+                        c(i1,i2) = c(i1-1,i2);
+                        d(i1,i2) = d(i1-1,i2);
+                    else
+                        [a(i1,i2),b(i1,i2),c(i1,i2),d(i1,i2)]=RTControl(tmo(i1,i2),tmf(i1,i2),xmo(i1,i2),xmf(i1,i2),vmo(i1,i2),vmf(i1,i2));
+                    end
+                    % Update states and control
+                    tm(i1,i2)=i1*dt;
+                    xm(i1,i2) = a(i1,i2)*tm(i1,i2)^3/6 + b(i1,i2)*tm(i1,i2)^2/2 + c(i1,i2)*tm(i1,i2) + d(i1,i2);
+                    vm(i1,i2) = a(i1,i2)*tm(i1,i2)^2/2 + b(i1,i2)*tm(i1,i2) + c(i1,i2);
+                    um(i1,i2) = a(i1,i2)*tm(i1,i2) + b(i1,i2);
+
+                    if tmf(i1,i2)-tmo(i1,i2)<= 2 && (vm(i1,i2)> vmf(1,i2) || vm(i1,i2)< vmf(1,i2))
+                        vm(i1,i2) = vmf(1,i2);
+                        um(i1,i2) = 0;
+                        xm(i1,i2) = xm(i1-1,i2) + vmf(1,i2)*dt;
+                    end
+                    % if the vehicle hit the lower bound on speed, don't apply 
+                    % control. Update states and initial conditions
+                    if vm(i1,i2)<vmin_mr 
+
+                        % Update states and control
+                        xm(i1,i2) = xm(i1-1,i2)+ vm(i1-1,i2)*dt; % delta t = 1
+                        vm(i1,i2) = vm(i1-1,i2);
+                        um(i1,i2) = 0;
+                        flag(i1,i2) = 1;
+
+                        % Update initial conditions
+                        xmo(i1,i2) = xm(i1-1,i2);
+                        xmf(i1,i2) = xmf(i1-1,i2);
+                        vmo(i1,i2) = vm(i1-1,i2);
+                        vmf(i1,i2) = vmf(i1-1,i2);
+                        tmo(i1,i2) = tm(i1-1,i2);
+                        tmf(i1,i2) = tmf(i1,i2-1) + iz_length/vmf(i1,i2-1)-0.02;                    
+                    end
+
+                end
+
+            end
+
+            % Update variables after control zone 
+            if xm(i1-1,i2)>400
+
+                % Update initial conditions:
+                xmf(i1,i2) = xmf(i1-1,i2); % We want xf to be constant always
+                vmf(i1,i2) = vmf(i1-1,i2); % We want vf to be constant always
+                tmo(i1,i2) = tmo(i1-1,i2); % We want to=0 always
+                tmf(i1,i2) = tmf(i1-1,i2); % We want tf to keep constant until we enter the control zone
+
+                % Update states
+                tm(i1,i2)=i1*dt;
+                xm(i1,i2) = xm(i1-1,i2)+ vmf(i1,i2)*dt;
+                vm(i1,i2) = vmf(i1,i2);
+                um(i1,i2) = 0;
+            end
+
+            if xm(i1,i2)<430 && R12_ini_h(1,i2)==2
+                y(i1,i2)=xm(i1,i2)*0.25;
+            else
+                y(i1,i2)=107.625;
+            end
+    end
+        if R12_ini_h(2,i2)== 4% if MDV  ------------------------------------
+            if xm(i1-1,i2)<0            
+            % Update initial conditions:
+                xmo(i1,i2) = xm(i1-1,i2); % We want xo to be constant until reaching the control zone
+                xmf(i1,i2) = xmf(i1-1,i2); % We want xf to be constant always
+                vmo(i1,i2) = vm(i1-1,i2); 
+                vmf(i1,i2) = vmf(i1-1,i2); 
+                tmo(i1,i2) = i1-1; % We want to update to at each instant of time
+                tmf(i1,i2) = tmf(i1-1,i2); % We want tf to keep constant until we enter the control zone
+
+                tm(i1,i2)=i1*dt;
+                xm(i1,i2) = xm(i1-1,i2)+ vmo(i1,i2)*dt; 
+                vm(i1,i2) = vmo(i1,i2);
+                um(i1,i2) =-0.05;
+                flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
+                % rear end collision constraint ---------------
+                Ssafe = 10;
+                if(i2~=1)
+                    if xm(i1,i2)-xm(i1,i2-1)<Ssafe 
+                        vm(i1,i2)=vm(i1,i2-1)-2;
+                    end
+                end
+                    
+                if xm(i1,i2)>=0
+                    xmo(i1,i2) = xm(i1,i2);
+                    tmo(i1,i2) = tm(i1,i2);
+                    vmo(i1,i2) = vm(i1,i2);
+                end
+
+            end
+
+            % Update variables and control on the control zone
+            if xm(i1-1,i2)>=0 && xm(i1-1,i2)<=430
+
+                % Calculate control for first vehicle:
+                if i2==1
+
+                    % Update the initial conditions:
+                    xmo(i1,i2) = xm(i1-1,i2);
+                    xmf(i1,i2) = xmf(i1-1,i2); 
+                    vmo(i1,i2) = vm(i1-1,i2);
+
+                    % vmf(i1,i2) = vmf(i1-1,i2);% CHECK THIS
+                    %vmf(i1,i2) = 12.7631; % from distribution
+                    vmf(i1,i2) = vf_model(1,i2);
+                    tmo(i1,i2) = tm(i1-1,i2);
+                    tmf(i1,i2) = tmf(i1-1,i2); 
+
+                    % Update states and control
+                    tm(i1,i2)=i1*dt;
+                    um(i1,i2) = -0.05;
+                    vm(i1,i2) = sqrt((vmf(i1,i2)).^2-(2*um(i1,i2)*(430-xmo(i1,i2))));
+                    xm(i1,i2) = xmo(i1,i2)+vm(i1,i2)*dt+(0.5*um(i1,i2)*dt^2);
+
+                else % for rest of the vehicles
+                    % Update the initial conditions
+                    xmo(i1,i2) = xm(i1-1,i2);
+                    xmf(i1,i2) = xmf(i1-1,i2); 
+                    vmo(i1,i2) = vm(i1-1,i2);
+
+                    vmf(i1,i2) = vf_model(1,i2); % from distribution
+                    tmo(i1,i2) = tm(i1-1,i2);
+                    tmf(i1,i2) = tmf(i1,i2-1)+ iz_length/vmf(i1,i2-1);
+
+                    % Calculate constants. If to is too close to tf, control
+                    % signal will go to infinity, so, the control should be
+                    % stopped if the difference between the two is less than 3 seconds
+
+                    % Update states and control
+                    tm(i1,i2)=i1*dt;
+                    um(i1,i2) = -0.05;
+                    vm(i1,i2) = sqrt((vmf(i1,i2)).^2-(2*um(i1,i2)*(430-xmo(i1,i2))));
+                    xm(i1,i2) = xmo(i1,i2)+vm(i1,i2)*dt+(0.5*um(i1,i2)*dt^2);    
+            % rear end collision constraint ---------------
+                    Ssafe = 10;
+                    if(i2~=1)
+                        if xm(i1,i2)-xm(i1,i2-1)<Ssafe 
+                            vm(i1,i2)=vm(i1,i2-1)-2;
+                        end
+                    end
+               end
+
+            end
+            % Update variables after control zone 
+            if xm(i1-1,i2)>430
+                % Update initial conditions:
+                xmf(i1,i2) = xmf(i1-1,i2); % We want xf to be constant always
+                vmf(i1,i2) = vmf(i1-1,i2); % CHECK THIS GIVE some value
+                tmo(i1,i2) = tmo(i1-1,i2); % We want to=0 always
+                tmf(i1,i2) = tmf(i1-1,i2); % We want tf to keep constant until we enter the control zone
+
+                % Update states
+                tm(i1,i2)=i1*dt;
+                xm(i1,i2) = xm(i1-1,i2)+ vmf(i1,i2)*dt;
+                vm(i1,i2) = vmf(i1,i2);
+                um(i1,i2) = -0.05;
+            end
+            
+          % rear end collision constraint ---------------
+                Ssafe =10;
+                if(i2~=1)
+                    if xm(i1,i2)-xm(i1,i2-1)<Ssafe 
+                        vm(i1,i2)=vm(i1,i2-1)-2;
+                    end
+                end
+            if xm(i1,i2)<430 && R12_ini_h(1,i2)==2
+                ym(i1,i2)=xm(i1,i2)*0.25;
+            else
+                ym(i1,i2)=107.625;
+            end       
+            
+        end % for loop of MDV or CAV
+         end % for if loop of seconsdary road
+    end % for loop of vehicles
+end % end for for loop of time
+
+
 % we have x for main road, xm for secondary road
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
