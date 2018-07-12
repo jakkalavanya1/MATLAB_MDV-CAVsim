@@ -35,7 +35,7 @@ numel = t_sim/dt;
 
 % R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
 % R2_xo = {[ -125 -130],[3,4]};
-R1_xo = {[-125 -130],[3,4]}; % 3= CAV, 4= MANUAL
+R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
@@ -43,22 +43,26 @@ s1 = struct(road_1,R1_xo);
 s2 = struct(road_2,R2_xo);
 
 
+
 % vehicles on main road
 % Identify main road as 1
-R1_ini(1,:)= ones(1,length(s1(1).r1));
+R1_ini(1,:)= ones(1,length(s1(1).r1)); % gets number of vehicles in road 1
 % xo: Initial position on x
-R1_ini(2,:)= s1(1).r1; % x position 
+R1_ini(2,:)= s1(1).r1; % takes only positions(X) of the vehicles on road 1 
 % yo: Initial position on y
 R1_ini(3,:)= 107.625; 
 % xf: Initial position
-R1_ini(4,:)= ones(1,length(R1_xo))*cz_length;
+R1_ini(4,:)= ones(1,length(s1(1).r1))*cz_length;
 %vo: Initial speed
-R1_ini(5,:)= ones(1,length(R1_xo))*vavg_mr; % CHANGE
+R1_ini(5,:)= ones(1,length(s1(1).r1))*vavg_mr; % CHANGE % it is just like a reference value because it will be different for MDV 
 % vf: final speed
-R1_ini(6,:)= ones(1,length(R1_xo))*vmax_mr; % CHANGE
+R1_ini(6,:)= ones(1,length(s1(1).r1))*vmax_mr; % CHANGE
 % t2iz: Time to intersection zone at constant speed = vavg
 R1_ini(7,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
-R1_ini(8,:)=s1(2).r1;
+% gives approximate time to enter merging zone % its okay to consider
+% this because our problem is single lane. no overtakes so
+% definitely vehicles reach based onthe order of positions they start
+R1_ini(8,:)=s1(2).r1; % identifies if vehicle is CAV or MDV
 
 
 % vehicles on secondary road
@@ -68,16 +72,14 @@ R2_ini(2,:)= s2(1).r2;
 % yo: Initial position on y
 R2_ini(3,:)= s2(1).r2*0.25; 
 % xf: final position
-
-% Identify secundary road as 2
-R2_ini(4,:)= ones(1,length(R2_xo))*(cz_length); 
+R2_ini(4,:)= ones(1,length(s2(1).r2))*(cz_length); 
 % vo: Initial speed
-R2_ini(5,:)= ones(1,length(R2_xo))*vavg_sr; 
+R2_ini(5,:)= ones(1,length(s2(1).r2))*vavg_sr; 
 % vf: final speed
-R2_ini(6,:)= ones(1,length(R2_xo))*vmax_sr; 
+R2_ini(6,:)= ones(1,length(s2(1).r2))*vmax_sr; 
 % tf: time to reach intersection
 R2_ini(7,:)= (cz_length-s2(1).r2)./R2_ini(5,:); 
-R2_ini(8,:)=s2(2).r2;
+R2_ini(8,:)=s2(2).r2;% identifies if vehicle is CAV or MDV
 % Reorganize vehicles in hierarchy according to time to reach control zone
 
 
@@ -119,28 +121,28 @@ a_CAV = 0;
 %% Initial conditions for each vehicle
 
 % Vehicles on main road
-
-% xf: Initial position
-R1_ini(4,:)= ones(1,length(R1_xo))*cz_length;
-%vo: Initial speed
-R1_ini(5,:)= ones(1,length(R1_xo))*vavg_mr; % CHANGE
-% vf: final speed
-R1_ini(6,:)= ones(1,length(R1_xo))*vmax_mr; % CHANGE
-% t2iz: Time to intersection zone at constant speed = vavg
-R1_ini(7,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
-R1_ini(8,:)=s1(2).r1;
-% Vehicles on secundary road
-
-% Identify secundary road as 2
-R2_ini(4,:)= ones(1,length(R2_xo))*(cz_length); 
-% vo: Initial speed
-R2_ini(5,:)= ones(1,length(R2_xo))*vavg_sr; 
-% vf: final speed
-R2_ini(6,:)= ones(1,length(R2_xo))*vmax_sr; 
-% tf: time to reach intersection
-R2_ini(7,:)= (cz_length-s2(1).r2)./R2_ini(5,:); 
-R2_ini(8,:)=s2(2).r2;
-% Reorganize vehicles in hierarchy according to time to reach control zone
+% 
+% % xf: Initial position
+% R1_ini(4,:)= ones(1,length(R1_xo))*cz_length;
+% %vo: Initial speed
+% R1_ini(5,:)= ones(1,length(R1_xo))*vavg_mr; % CHANGE
+% % vf: final speed
+% R1_ini(6,:)= ones(1,length(R1_xo))*vmax_mr; % CHANGE
+% % t2iz: Time to intersection zone at constant speed = vavg
+% R1_ini(7,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
+% R1_ini(8,:)=s1(2).r1;
+% % Vehicles on secundary road
+% 
+% % Identify secundary road as 2
+% R2_ini(4,:)= ones(1,length(R2_xo))*(cz_length); 
+% % vo: Initial speed
+% R2_ini(5,:)= ones(1,length(R2_xo))*vavg_sr; 
+% % vf: final speed
+% R2_ini(6,:)= ones(1,length(R2_xo))*vmax_sr; 
+% % tf: time to reach intersection
+% R2_ini(7,:)= (cz_length-s2(1).r2)./R2_ini(5,:); 
+% R2_ini(8,:)=s2(2).r2;
+% % Reorganize vehicles in hierarchy according to time to reach control zone
 
 % Concatenate matrices
 R12_ini = horzcat(R1_ini, R2_ini); % Concatenate the two matrices 
@@ -752,7 +754,7 @@ i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
 
 for n=1:t_sim
-    j=1;
+%     j=1;
     for k=1:length(i4)
         if R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2
             % it is CAV and on secondary road
@@ -772,7 +774,8 @@ for n=1:t_sim
             plot(x2(n),y2(n),'or','MarkerSize',5, 'MarkerFaceColor','r' );
              hold on;
         end
-
+    end
+    for j=1:length(i5)
         if R12_ini_h(8,i5(j)) == 3 && R12_ini_h(1,i5(j))==1 && j<=length(i5)
             % it is CAV and on main road
             x3(n)= x(n,i5(j)); % main road
@@ -780,7 +783,7 @@ for n=1:t_sim
             u3(n)= u(n,i5(j));
             v3(n)= v(n,i5(j));
             plot(x3(n),y3(n),'ob','MarkerSize',5, 'MarkerFaceColor','b' );
-            hold on
+            hold on;
         end
         if(R12_ini_h(8,i5(j)) == 4 && R12_ini_h(1,i5(j))==1) && j<=length(i5)
             % it is MDV an on main road
@@ -789,9 +792,9 @@ for n=1:t_sim
             u4(n)= u(n,i5(j));
             v4(n)= v(n,i5(j));
             plot(x4(n),y4(n),'or','MarkerSize',5,  'MarkerFaceColor','r');
-            hold off
+            hold off;
         end
-        j=j+1;
+%         j=j+1;
     end
    
     axis([0,600,-50,150]);

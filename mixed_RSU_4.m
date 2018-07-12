@@ -2,6 +2,12 @@
 % 2 CAVs and one MDV on each road
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
+
+% if j=1, j=j+1 is defined in animation and only one for loop of i4 is used
+% the 4 cars are show in animation
+% if 5th car is added, only 4 cars are displayed
+% if changes are made to incorporate the 5th car it doesnt work
+% only one car runs
 %%
 clear; 
 clear all
@@ -433,11 +439,11 @@ for i1=2:numel
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
-
+p=1;
 for n=1:t_sim
-    j=1;
-    for k=1:length(i4)
-        if R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2
+
+    for k=1:length(i5)
+        if k<=length(i4) && R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2 
             % it is CAV and on secondary road
             x1(n)= x(n,i4(k)); % Secondary road
             y1(n)= y(n,i4(k));
@@ -446,35 +452,38 @@ for n=1:t_sim
             plot(x1(n),y1(n),'ob','MarkerSize',5, 'MarkerFaceColor','b' );
             hold on;
         end
-        if(R12_ini_h(8,i4(k)) == 4 && R12_ini_h(1,i4(k))==2)
+        if k<=length(i4) && (R12_ini_h(8,i4(k)) == 4 && R12_ini_h(1,i4(k))==2) 
             % it is MDV and on secondary road
             x2(n)= x(n,i4(k)); % Secondary road
             y2(n)= y(n,i4(k));
             u2(n)= u(n,i4(k));
             v2(n)= v(n,i4(k));          
             plot(x2(n),y2(n),'or','MarkerSize',5, 'MarkerFaceColor','r' );
-             hold on;
+            hold on;
         end
+%     end
+%     for j=1:length(i5)
 
-        if R12_ini_h(8,i5(j)) == 3 && R12_ini_h(1,i5(j))==1 && j<=length(i5)
+        if k<=length(i5) && R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1 
             % it is CAV and on main road
-            x3(n)= x(n,i5(j)); % main road
-            y3(n)= y(n,i5(j));
-            u3(n)= u(n,i5(j));
-            v3(n)= v(n,i5(j));
+            x3(n)= x(n,i5(k)); % main road
+            y3(n)= y(n,i5(k));
+            u3(n)= u(n,i5(k));
+            v3(n)= v(n,i5(k));
+            p=p+1;
             plot(x3(n),y3(n),'ob','MarkerSize',5, 'MarkerFaceColor','b' );
             hold on
         end
-        if(R12_ini_h(8,i5(j)) == 4 && R12_ini_h(1,i5(j))==1) && j<=length(i5)
+        if k<=length(i5) && (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
             % it is MDV an on main road
-            x4(n)=x(n,i5(j)); % Main road
-            y4(n)=y(n,i5(j));      
-            u4(n)= u(n,i5(j));
-            v4(n)= v(n,i5(j));
+            x4(n)=x(n,i5(k)); % Main road
+            y4(n)=y(n,i5(k));      
+            u4(n)= u(n,i5(k));
+            v4(n)= v(n,i5(k));
             plot(x4(n),y4(n),'or','MarkerSize',5,  'MarkerFaceColor','r');
             hold off
         end
-        j=j+1;
+         j=j+1;
     end
    
     axis([0,600,-50,150]);
