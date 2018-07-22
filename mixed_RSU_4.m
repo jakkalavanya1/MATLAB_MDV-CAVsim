@@ -514,3 +514,20 @@ myVideo.Quality = 90;    % Default 75
 open(myVideo);
 writeVideo(myVideo, M);
 close(myVideo);
+
+
+% now write xo and the index of cars into a csv file and also the y values
+% data={x,y,R12_ini};
+% csvwrite('xdata.dat',x)
+% dlmwrite('xdata.dat',R12_ini(1,:),'-append')
+% dlmwrite('xdata.dat',R12_ini(8,:))
+% csvwrite('ydata.dat',y)
+
+
+sheet = 2;
+xlRange = 'E1';
+filename = 'xydata.xlsx';
+xlswrite(filename,x,1)
+xlswrite(filename,y,2)
+xlswrite(filename,R12_ini,3)
+
