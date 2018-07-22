@@ -3,8 +3,8 @@
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
 
-% if j=1, j=j+1 is defined in animation and only one for loop of i4 is used
-% the 4 cars are show in animation
+% PROBLEM WITH CODE:
+% the 4 cars are shown in animation
 % if 5th car is added, only 4 cars are displayed
 % if changes are made to incorporate the 5th car it doesnt work
 % only one car runs
@@ -32,11 +32,10 @@ yo_mr = 107.625; % initial position on y-axis
 numel = t_sim/dt; % gives number of times the loop runs
 
 %% Define initial position for the vehicles on each road
-% R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL
+% R1_xo = {[-125 -130],[4,3]}; % 3= CAV, 4= MANUAL % error
 % R2_xo = {[ -125 -130],[3,4]};
-% R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV, 4= MANUAL
-% R2_xo = {[ -125 -150],[3,4]};
-
+R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
+R2_xo = {[ -125 -150],[3,4]};
 R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -150],[3,4]};
 road_1 = 'r1';
@@ -151,13 +150,13 @@ y=yo;
 v=vo;
 u=0*v;
 
-vf_gaussian=normrnd(v1_model(1,1),1)
-a_predict=(vf_gaussian^2-v1_model(1,1)^2)/(2*400); %500 is distance
-v2_predict=sqrt(v1_model(1,1).^2+2*a_predict*(100)) % vel at RSU2 predicted using acclf from gaussain
-tm_predict=2*(400)/(vf_gaussian+v1_model(1,1))   
-
-vf_newpredict= 12.5; % predict one value between 12 to 14
-error=v2_predict-v2_RSU2
+% vf_gaussian=normrnd(v1_model(1,1),1)
+% a_predict=(vf_gaussian^2-v1_model(1,1)^2)/(2*400); %500 is distance
+% v2_predict=sqrt(v1_model(1,1).^2+2*a_predict*(100)) % vel at RSU2 predicted using acclf from gaussain
+% tm_predict=2*(400)/(vf_gaussian+v1_model(1,1))   
+% 
+% vf_newpredict= 12.5; % predict one value between 12 to 14
+% error=v2_predict-v2_RSU2
 
 
 % Loop for the simulation time
@@ -442,10 +441,20 @@ for i1=2:numel
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
-p=1;
-for n=1:t_sim
-%     j=1;
-    for k=1:length(i5)
+if length(i4)==length(i5)
+    p=length(i5);
+end
+if length(i4)>length(i5)
+    p=length(i4);
+end
+if length(i5)>length(i4)
+    p=length(i5);
+end
+% p=(length(i5)>=length(i4)):length(i5):length(i4) % ternary condition
+
+for n=1:numel
+    j=1;
+    for k=1:p
         if k<=length(i4) && R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2 
             % it is CAV and on secondary road
             x1(n)= x(n,i4(k)); % Secondary road
@@ -486,7 +495,7 @@ for n=1:t_sim
             plot(x4(n),y4(n),'or','MarkerSize',5,  'MarkerFaceColor','r');
             hold off
         end
-%          j=j+1;
+         j=j+1;
     end
    
     axis([0,600,-50,150]);
@@ -517,20 +526,3 @@ myVideo.Quality = 90;    % Default 75
 open(myVideo);
 writeVideo(myVideo, M);
 close(myVideo);
-
-
-% now write xo and the index of cars into a csv file and also the y values
-% data={x,y,R12_ini};
-% csvwrite('xdata.dat',x)
-% dlmwrite('xdata.dat',R12_ini(1,:),'-append')
-% dlmwrite('xdata.dat',R12_ini(8,:))
-% csvwrite('ydata.dat',y)
-
-
-sheet = 2;
-xlRange = 'E1';
-filename = 'xydata.xlsx';
-xlswrite(filename,x,1)
-xlswrite(filename,y,2)
-xlswrite(filename,R12_ini,3)
-
