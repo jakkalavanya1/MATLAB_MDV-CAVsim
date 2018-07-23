@@ -5,11 +5,9 @@ Created on Sat Jul 21 19:30:22 2018
 @author: LAVANYA
 """
 
-import pandas as pd
-from pandas import ExcelWriter
-from pandas import ExcelFile
- 
-df = pd.read_excel('F:\GitHub\jakkalavanya1 GITHUB\MATLAB_MDV-CAVsim\xydata.xlsx', sheetname='Sheet1')
- 
-
-x_data = pd.ExcelFile(r"F:\GitHub\jakkalavanya1 GITHUB\MATLAB_MDV-CAVsim\xydata.xlsx")
+import csv
+with open('F:\GitHub\jakkalavanya1 GITHUB\MATLAB_MDV-CAVsim\index.csv', 'rb') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter=' ', quotechar='|')
+    spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
+    #for row in spamreader:
+     #   print( ', '.join(row))

@@ -37,7 +37,7 @@ numel = t_sim/dt; % gives number of times the loop runs
 % R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV, 4= MANUAL
 % R2_xo = {[ -125 -150],[3,4]};
 
-R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV, 4= MANUAL
+R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL
 R2_xo = {[ -125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
@@ -443,7 +443,7 @@ for i1=2:numel
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
 p=1;
-for n=1:t_sim
+for n=1:numel
 %     j=1;
     for k=1:length(i5)
         if k<=length(i4) && R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2 
@@ -525,12 +525,17 @@ close(myVideo);
 % dlmwrite('xdata.dat',R12_ini(1,:),'-append')
 % dlmwrite('xdata.dat',R12_ini(8,:))
 % csvwrite('ydata.dat',y)
-
-
-sheet = 2;
-xlRange = 'E1';
+csvwrite('index.csv',R12_ini)
+%save a seperate csv file of R12_ini so that we can use index of cars
+% below save the x,y data into excel sheet. can also do as csv
 filename = 'xydata.xlsx';
-xlswrite(filename,x,1)
-xlswrite(filename,y,2)
-xlswrite(filename,R12_ini,3)
+data=horzcat(x,y);
+xlswrite(filename,data)
+%csvwrite(filename,data)
+%xlswrite(filename,R12_ini) % this overwrites on the previous data
 
+% 
+% hor concat of all the matrices
+% save as excel
+% and save to .csv
+% then in open in python and save certain number of columns into matrix
