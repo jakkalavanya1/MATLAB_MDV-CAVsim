@@ -11,3 +11,5 @@ with open('F:\GitHub\jakkalavanya1 GITHUB\MATLAB_MDV-CAVsim\index.csv', 'rb') as
     spamwriter.writerow(['Spam'] * 5 + ['Baked Beans'])
     #for row in spamreader:
      #   print( ', '.join(row))
+     for i= 1 : numel:
+         
