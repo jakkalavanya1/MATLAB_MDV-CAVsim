@@ -27,10 +27,10 @@ print("the value of a is",a)
 reader_list=list(csv.reader(ifile, delimiter=',')) #it makes list of lists into normal list
 result=numpy.array(reader_list).astype("float")
 print("the result is",result)
-
+'''
 index=result[7][:] #in python index starts from 0
 print("the index of cav and non CAV are",index)
 time=len(result) #equals to the numel in MATLAB (time)
 for i in time:
     if index[k]==3 && road[]==1:
-        plot(result[k])
+        plot(result[k])'''
