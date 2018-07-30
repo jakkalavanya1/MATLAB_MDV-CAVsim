@@ -36,7 +36,7 @@ numel = t_sim/dt; % gives number of times the loop runs
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -130 ],[3,3]}; % 3= CAV(blue), 4= MANUAL(red)
+R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[ -125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
@@ -439,6 +439,22 @@ for i1=2:numel
 end
  
 %=========================================================
+xmo=R12_ini_h(2,:); % This is still the initial position to start before the control zone
+ymo=R12_ini_h(3,:);
+xmf=R12_ini_h(4,:);
+vmo=R12_ini_h(5,:);
+vmf=R12_ini_h(6,:);
+tmo=0.*R12_ini_h(2,:);
+tmf=R12_ini_h(9,:);
+tm2exit=R12_ini_h(9,:);
+tm=zeros(1,length(tmf));
+% State and control values for t=0
+xm=xmo;
+ym=ymo;
+vm=vmo;
+um=0*vm;
+
+
 %  Loop for the simulation time
 for i1=2:numel
     
@@ -446,7 +462,7 @@ for i1=2:numel
     for i2=1:length(R12_ini_h(1,:))
 
         if R12_ini_h(1,i2)==2 % if secondary road
-            if R12_ini_h(2,i2)== 3 % if CAV
+            if R12_ini_h(8,i2)== 3 % if CAV
             % Update variables before control zone 
                 if xm(i1-1,i2)<0
 
@@ -600,7 +616,7 @@ for i1=2:numel
                 y(i1,i2)=107.625;
             end
     end
-        if R12_ini_h(2,i2)== 4% if MDV  ------------------------------------
+        if R12_ini_h(8,i2)== 4% if MDV  ------------------------------------
             if xm(i1-1,i2)<0            
             % Update initial conditions:
                 xmo(i1,i2) = xm(i1-1,i2); % We want xo to be constant until reaching the control zone
