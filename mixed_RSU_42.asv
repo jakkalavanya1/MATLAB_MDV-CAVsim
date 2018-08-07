@@ -726,12 +726,7 @@ for i1=2:numel
      
             
         end % for loop of MDV or CAV
-            if xm(i1,i2)<430 && R12_ini_h(1,i2)==2
-                ym(i1,i2)=xm(i1,i2)*0.25;
-            else 
-                 ym(i1,i2)=107.625;
-% changed this if condition out of for loop of MDV,CAV
-            end  
+        
          end % for if loop of seconsdary road
     end % for loop of vehicles
 end % end for for loop of time
