@@ -37,8 +37,8 @@ numel = t_sim/dt; % gives number of times the loop runs
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -150 -155],[3,4,4]}; % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[-125 -150],[3,4]};
+R1_xo = {[-125 -150],[3,3]}; % 3= CAV(blue), 4= MANUAL(red)
+R2_xo = {[-125 -150 -155 -160],[3,4,4,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -158,15 +158,15 @@ u=0*v;
 % 
 % vf_newpredict= 12.5; % predict one value between 12 to 14
 % error=v2_predict-v2_RSU2
-
-
+i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
+q=1; % we define q as an index for i5 AUG 7
 % Loop for the simulation time
 for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-         if R12_ini_h(1,i2)==1 % if main road
-            if R12_ini_h(8,i2)== 3 % if CAV
+         if R12_ini_h(1,i2)==1 && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
+            if R12_ini_h(8,i2)== 3  % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
 
@@ -244,7 +244,7 @@ for i1=2:numel
                         
                     end
 
-
+                q=q+1; % increase q because one car exists and we go to next car in the next i2 loop
                 else % for the rest of the vehicles
 
                     % Update the initial conditions
@@ -253,8 +253,10 @@ for i1=2:numel
                     vo(i1,i2) = v(i1-1,i2);
                     vf(i1,i2) = vf(i1-1,i2);
                     to(i1,i2) = t(i1-1,i2);
-                    tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
-                    
+                    tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
+                    %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
+                    %changed i2-1(any previous vehicle) to previous main
+                    %road vehicle (i5(q-1)) AUG 7
                     % Calculate constants. If to is too close to tf, control
                     % signal will go to infinity, so, the control should be
                     % stopped if the difference between the two is less than 3 seconds
@@ -297,9 +299,12 @@ for i1=2:numel
                         vo(i1,i2) = v(i1-1,i2);
                         vf(i1,i2) = vf(i1-1,i2);
                         to(i1,i2) = t(i1-1,i2);
-                        tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;                    
+                        tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
+                        %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
+                    %changed i2-1(any previous vehicle) to previous main
+                    %road vehicle (i5(q-1)) AUG 7
                     end
-
+                    q=q+1; % increase q to next vehicle number AUG 7
                 end
 
             end
@@ -762,13 +767,11 @@ end % end for for loop of time
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 i5=find(R12_ini_h(1,:)==1); % Identifies main road
-i6=0;
+
 if length(i4)==length(i5)
     p=length(i5);
-    i6=i4;
 elseif length(i4)>length(i5)
     p=length(i4);
-    i6=i4;
 elseif length(i5)>length(i4)
     p=length(i5);
 end
@@ -776,7 +779,7 @@ end
 
 for n=1:numel
     %j=1;
-    for k=1:p
+    for k=1:length(i4)
         if (R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2)
             % it is CAV and on secondary road
             % since secondary road x is changed to xm similarly other
@@ -797,6 +800,8 @@ for n=1:numel
             plot(xm(n,i4(k)),ym(n,i4(k)),'or','MarkerSize',5, 'MarkerFaceColor','r' );
             hold on;
         end
+    end
+    for k=1:length(i5)
 %     end
 %     for j=1:length(i5)
 
