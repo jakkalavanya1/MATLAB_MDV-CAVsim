@@ -225,6 +225,9 @@ for i1=2:numel
                     c(i1,i2) = c(i1-1,i2);
                     d(i1,i2) = d(i1-1,i2);
                 else
+                        disp('values for RTcontrol') 
+                        disp(to)
+                        disp(tf)
                     [a(i1,i2),b(i1,i2),c(i1,i2),d(i1,i2)]=RTControl(to(i1,i2),tf(i1,i2),xo(i1,i2),xf(i1,i2),vo(i1,i2),vf(i1,i2));
                 end
                 % Update states and control

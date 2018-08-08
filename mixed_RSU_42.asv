@@ -37,8 +37,8 @@ numel = t_sim/dt; % gives number of times the loop runs
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -130 ],[3,4]}; % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[ -125 -150],[3,4]};
+R1_xo = {[-125 -150],[4,4]}; % 3= CAV(blue), 4= MANUAL(red)
+R2_xo = {[-125 -150],[4,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -263,7 +263,11 @@ for i1=2:numel
                         b(i1,i2) = b(i1-1,i2);
                         c(i1,i2) = c(i1-1,i2);
                         d(i1,i2) = d(i1-1,i2);
+                       
                     else
+                        disp('values for RTcontrol') 
+                        disp(to)
+                        disp(tf)
                         [a(i1,i2),b(i1,i2),c(i1,i2),d(i1,i2)]=RTControl(to(i1,i2),tf(i1,i2),xo(i1,i2),xf(i1,i2),vo(i1,i2),vf(i1,i2));
                     end
                     % Update states and control
@@ -663,7 +667,7 @@ for i1=2:numel
             if xm(i1-1,i2)>=0 && xm(i1-1,i2)<=430
 
                 % Calculate control for first vehicle:
-                if i2==1
+                if i2==2 % in secondary road first vehicle is in 2nd position of R12_ini_h matrix AUGUST 7
 
                     % Update the initial conditions:
                     xmo(i1,i2) = xm(i1-1,i2);
@@ -731,10 +735,14 @@ for i1=2:numel
             
           % rear end collision constraint ---------------
                 
-                if(i2~=1)
+                if(i2~=2)% changed i2=1 to i2=1 because in secondary road always the first vehicle is in second
+                % column (i think based on distance also) in R12_ini_h
+                % matrix
+                if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
                     if xm(i1,i2)-xm(i1,i2-1)<Ssafe 
                         vm(i1,i2)=vm(i1,i2-1)-2;
                     end
+                end
                 end
      
             
@@ -766,13 +774,13 @@ end
 % p=(length(i5)>=length(i4)):length(i5):length(i4) % ternary condition
 
 for n=1:numel
-    j=1;
+    %j=1;
     for k=1:p
-        if k<=length(i4) && R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2 
+        if k<=p && R12_ini_h(8,i4(k)) == 3 && R12_ini_h(1,i4(k))==2 
             % it is CAV and on secondary road
             % since secondary road x is changed to xm similarly other
             % variables AUGUST 7
-            x1(n)= xm(n,i4(k)); % Secondary road
+            x1(p)= xm(n,i4(k)); % Secondary road
             y1(n)= ym(n,i4(k));
             u1(n)= um(n,i4(k));
             v1(n)= vm(n,i4(k));
