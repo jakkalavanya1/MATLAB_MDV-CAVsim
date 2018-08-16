@@ -798,7 +798,7 @@ for n=1:numel
             v2(n)= vm(n,i4(k));          
             %disp('case 2');
             plot(xm(n,i4(k)),ym(n,i4(k)),'or','MarkerSize',5, 'MarkerFaceColor','r' );
-            hold on;
+            hold off;
         end
     end
     for k=1:length(i5)

@@ -3,11 +3,7 @@
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
 
-% PROBLEM WITH CODE:
-% the 4 cars are shown in animation
-% if 5th car is added, only 4 cars are displayed
-% if changes are made to incorporate the 5th car it doesnt work
-% only one car runs
+
 %%
 clear; 
 clear all
