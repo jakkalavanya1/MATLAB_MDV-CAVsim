@@ -34,7 +34,7 @@ numel = t_sim/dt; % gives number of times the loop runs
 % R1_xo = {[-125 -130 -140],[3,4,3]}; % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
 R1_xo = {[-100 -165],[3,4]}; % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[-120 ],[4]};
+R2_xo = {[-120 -130 ],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);

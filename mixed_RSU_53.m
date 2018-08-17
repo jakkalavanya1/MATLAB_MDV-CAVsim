@@ -2,9 +2,7 @@
 % 2 CAVs and one MDV on each road
 % need to add rear end collision constraint for manual vehicles
 % CAVs should sense rear end collision with MDV
-
-% WORKING for input vehicles where first ones are CAVs AUG 13 without
-% varuable 'q'
+ 
 %%
 % clears workspace, closes all figures, and clears command window
 clear; 
@@ -155,15 +153,15 @@ u=0*v;
 % vf_newpredict= 12.5; % predict one value between 12 to 14
 % % error=v2_predict-v2_RSU2
 
-% i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
-% q=1; % we define q as an index for i5 AUG 7
+i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
+q=1; % we define q as an index for i5 AUG 7
 
 % Loop for the simulation time
 for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-         if R12_ini_h(1,i2)==1% && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
+         if R12_ini_h(1,i2)==1 && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
             if R12_ini_h(8,i2)== 3  % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
@@ -242,17 +240,19 @@ for i1=2:numel
                         
                     end
 
-%                 q=q+1; % increase q because one car exists and we go to next car in the next i2 loop
+                 q=q+1; % increase q because one car exists and we go to next car in the next i2 loop
                 else % for the rest of the vehicles
-
+                if q== 1
+                    q=2; % used this if condition because when cav is 2nd car (q-1)value is becomeing 0 AUG 13
+                end
                     % Update the initial conditions
                     xo(i1,i2) = x(i1-1,i2);
                     xf(i1,i2) = xf(i1-1,i2);
                     vo(i1,i2) = v(i1-1,i2);
                     vf(i1,i2) = vf(i1-1,i2);
                     to(i1,i2) = t(i1-1,i2);
-%                     tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
-                    tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
+                    tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
+%                     tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
                     %changed i2-1(any previous vehicle) to previous main
                     %road vehicle (i5(q-1)) AUG 7
                     % Calculate constants. If to is too close to tf, control
@@ -297,12 +297,12 @@ for i1=2:numel
                         vo(i1,i2) = v(i1-1,i2);
                         vf(i1,i2) = vf(i1-1,i2);
                         to(i1,i2) = t(i1-1,i2);
-%                         tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
-                        tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
+                        tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
+%                         tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
                     %changed i2-1(any previous vehicle) to previous main
                     %road vehicle (i5(q-1)) AUG 7
                     end
-%                     q=q+1; % increase q to next vehicle number AUG 7
+                    q=q+1; % increase q to next vehicle number AUG 7
                 end
 
             end
