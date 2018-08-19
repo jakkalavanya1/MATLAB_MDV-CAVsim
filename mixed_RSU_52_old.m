@@ -32,12 +32,12 @@ yo_mr = 107.625;    % initial position on y-axis
 numel = t_sim/dt;   % Time step
 
 % Define initial position for the vehicles on each road
-% R1_xo = {[-125 -130],[4,3]};           % 3= CAV, 4= MANUAL % error
-% R2_xo = {[ -125 -130],[3,4]};
+R1_xo = {[-125 -150],[3,4]};           % 3= CAV, 4= MANUAL % error
+R2_xo = {[ -125 -150],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -150],[4,4]};             % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[-125 -150],[4,4]};
+% R1_xo = {[-125 -150],[3,4]};             % 3= CAV(blue), 4= MANUAL(red)
+% R2_xo = {[-125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -84,7 +84,7 @@ R2_ini(8,:)=s2(2).r2;% identifies if vehicle is CAV or MDV
 % Concatenate matrices
 R12_ini = horzcat(R1_ini, R2_ini); % Concatenate the two matrices 
 R12_ini_h = sortrows(R12_ini',7)';
-manualFlag = false;     % new variable to check for manual vehicle AUG 19
+
 %               MANUAL VEHICLE             
 %========================================================================
 a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
@@ -92,30 +92,26 @@ a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
 
 %s(1,:)=R2_xo; %distance travelled
 %j=1;
-
 for i = 1:length(R12_ini_h(2,:))
     if R12_ini_h(8,i)==4 % manual vehicle
         s(i)=R12_ini_h(2,i)
-        manualFlag = true; % flag set for manual vehicle AUG 19
         %j=j+1;
     end
 end
-if manualFlag==true     % checking for manual vehicle AUG 19
-    for i=1:length(s)
-        vf_model(i) = 12 + (14-12).*rand(1) % pre-defining v-final for MDV
-        %vf_model(i) = 12.6808
-        v1_model(i) = sqrt((vf_model(i))^2+2*a_model*s(i)); %initial velocity    
-        v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));  % velocity at RSU2  
-        v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400)); % velocity while entering merging
-        v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430)); % vel while leaving merging
-        tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;  % time while entering merging
-        tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model; % time while exit merging
-        t_headway(i)=tme_sr(i)-tm_sr(i); 
-        v1(1,i)=v1_model(i);
-    end  
-    v2_RSU2= v100_sr;
-end
 
+for i=1:length(s)
+    vf_model(i) = 12 + (14-12).*rand(1) % pre-defining v-final for MDV
+    %vf_model(i) = 12.6808
+    v1_model(i) = sqrt((vf_model(i))^2+2*a_model*s(i)); %initial velocity    
+    v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));  % velocity at RSU2  
+    v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400)); % velocity while entering merging
+    v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430)); % vel while leaving merging
+    tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;  % time while entering merging
+    tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model; % time while exit merging
+    t_headway(i)=tme_sr(i)-tm_sr(i); 
+    v1(1,i)=v1_model(i);
+end  
+v2_RSU2= v100_sr;
 
 %% Initial conditions for each vehicle
 % this loop calculates the time to leave the intersection zone
@@ -159,15 +155,15 @@ u=0*v;
 % vf_newpredict= 12.5; % predict one value between 12 to 14
 % % error=v2_predict-v2_RSU2
 
-% i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
-% q=1; % we define q as an index for i5 AUG 7
+i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
+q=1; % we define q as an index for i5 AUG 7
 
 % Loop for the simulation time
 for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-         if R12_ini_h(1,i2)==1% && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
+         if R12_ini_h(1,i2)==1 && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
             if R12_ini_h(8,i2)== 3  % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
@@ -255,8 +251,8 @@ for i1=2:numel
                     vo(i1,i2) = v(i1-1,i2);
                     vf(i1,i2) = vf(i1-1,i2);
                     to(i1,i2) = t(i1-1,i2);
-%                     tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
-                    tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
+                    tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
+%                     tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
                     %changed i2-1(any previous vehicle) to previous main
                     %road vehicle (i5(q-1)) AUG 7
                     % Calculate constants. If to is too close to tf, control
@@ -301,12 +297,12 @@ for i1=2:numel
                         vo(i1,i2) = v(i1-1,i2);
                         vf(i1,i2) = vf(i1-1,i2);
                         to(i1,i2) = t(i1-1,i2);
-%                         tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
-                        tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
+                        tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
+%                         tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
                     %changed i2-1(any previous vehicle) to previous main
                     %road vehicle (i5(q-1)) AUG 7
                     end
-%                     q=q+1; % increase q to next vehicle number AUG 7
+                    q=q+1; % increase q to next vehicle number AUG 7
                 end
 
             end

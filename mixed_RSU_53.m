@@ -30,12 +30,12 @@ yo_mr = 107.625;    % initial position on y-axis
 numel = t_sim/dt;   % Time step
 
 % Define initial position for the vehicles on each road
-R1_xo = {[-125 -130],[4,3]};           % 3= CAV, 4= MANUAL % error
-R2_xo = {[ -125 -130],[3,4]};
+% R1_xo = {[-125 -130],[4,3]};           % 3= CAV, 4= MANUAL % error
+% R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-% R1_xo = {[-125 -150],[3,4]};             % 3= CAV(blue), 4= MANUAL(red)
-% R2_xo = {[-125 -150],[3,4]};
+R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
+R2_xo = {[-125 -150],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -161,7 +161,10 @@ for i1=2:numel
     
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-         if R12_ini_h(1,i2)==1 && q<=length(i5)% if main road and q is used to check if previous vehicle(CAV/MDV) on main road
+        if mod(q,3)==0 % check q modulus 3 so that for alternate cars are taken in i5(q-1) AUG 19 
+            q=1;
+        end
+         if R12_ini_h(1,i2)==1 % if main road and q is used to check if previous vehicle(CAV/MDV) on main road
             if R12_ini_h(8,i2)== 3  % if CAV
             % Update variables before control zone 
                 if x(i1-1,i2)<0
@@ -240,12 +243,12 @@ for i1=2:numel
                         
                     end
 
-                 q=q+1; % increase q because one car exists and we go to next car in the next i2 loop
+%                  q=q+1; % increase q because one car exists and we go to next car in the next i2 loop
                 
                 else % for the rest of the vehicles
-                if q== 1
-                    q=2; % used this if condition because when cav is 2nd car (q-1)value is becomeing 0 AUG 13
-                end
+%                 if q== 1
+%                     q=2; % used this if condition because when cav is 2nd car (q-1)value is becomeing 0 AUG 13
+%                 end
                     % Update the initial conditions
                     xo(i1,i2) = x(i1-1,i2);
                     xf(i1,i2) = xf(i1-1,i2);
@@ -397,7 +400,7 @@ for i1=2:numel
 
                     vf(i1,i2) = vf_model(1,i2); % from distribution
                     to(i1,i2) = t(i1-1,i2);
-                    tf(i1,i2) = tf(i1,i2-1)+ iz_length/vf(i1,i2-1);
+                    tf(i1,i2) = tf(i1,i5(q-1))+ iz_length/vf(i1,i5(q-1));
 
                     % Calculate constants. If to is too close to tf, control
                     % signal will go to infinity, so, the control should be
@@ -419,7 +422,7 @@ for i1=2:numel
                end
 
             end
-            % Update variables after control zone 
+%             Update variables after control zone 
             if x(i1-1,i2)>430
                 % Update initial conditions:
                 xf(i1,i2) = xf(i1-1,i2); % We want xf to be constant always
@@ -449,6 +452,7 @@ for i1=2:numel
             end       
             
         end % for loop of MDV or CAV
+        q=q+1;  % increment for q when there is a vehicle in main road
      end % for the if loop of main road
    end
 end
@@ -736,7 +740,7 @@ end % end for for loop of time
 % we have x for main road, xm for secondary road
 %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
-i5=find(R12_ini_h(1,:)==1); % Identifies main road
+% i5=find(R12_ini_h(1,:)==1); % Identifies main road
 
 if length(i4)==length(i5)
     p=length(i5);
@@ -746,6 +750,8 @@ elseif length(i5)>length(i4)
     p=length(i5);
 end
 % p=(length(i5)>=length(i4)):length(i5):length(i4) % ternary condition
+
+
 for n=1:numel
     %j=1;
     for k=1:length(i4)
@@ -815,6 +821,25 @@ for n=1:numel
     pause(0.25)
     M(n)=getframe;
 end
+    axis([0,600,-50,150]);
+    xlabel('x (m)');
+    ylabel('y (m)');
+    line([0 700],[111.5 111.5],'color','k','LineWidth',2)
+    line([0 400],[103.75 103.75],'color','k','LineWidth',2)
+    line([430 700],[103.75 103.75],'color','k','LineWidth',2)
+    line([400 400],[100 111.5],'color','r','LineWidth',2,'LineStyle','--')
+    line([430 430],[103.75 111.5],'color','r','LineWidth',2,'LineStyle','--')
+    
+    line([0 400],[3.75 103.75],'color','k','LineWidth',2)
+    line([0 430],[-4 103.75],'color','k','LineWidth',2)
+    grid on
+    title('Vehicles Trajectory');
+    drawnow
+    pause(0.25)
+    M(n)=getframe;
+
+
+
 % Display results as animation
 figure
 axes('Position',[0 0 1500 1500])
