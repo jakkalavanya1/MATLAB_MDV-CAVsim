@@ -331,7 +331,6 @@ for i1=2:numel
             end
         end
         if R12_ini_h(8,i2)== 4 % if MDV  ------------------------------------
-            disp(x(i1-1,i2))
             if x(i1-1,i2)<0            
             % Update initial conditions:
                 xo(i1,i2) = x(i1-1,i2); % We want xo to be constant until reaching the control zone
@@ -365,13 +364,14 @@ for i1=2:numel
                 end
 
             end
-            disp('check x1')
-            %disp(x(i1-1,i2))
+            disp(x(i1,i2))
+            disp
             % Update variables and control on the control zone
             if x(i1-1,i2)>=0 && x(i1-1,i2)<=430
 
                 % Calculate control for first vehicle:
                 if i2==1
+
                     % Update the initial conditions:
                     xo(i1,i2) = x(i1-1,i2);
                     xf(i1,i2) = xf(i1-1,i2); 
@@ -388,7 +388,10 @@ for i1=2:numel
                     u(i1,i2) = -0.05;
                     v(i1,i2) = sqrt((vf(i1,i2)).^2-(2*u(i1,i2)*(430-xo(i1,i2))));
                     x(i1,i2) = xo(i1,i2)+v(i1,i2)*dt+(0.5*u(i1,i2)*dt^2);
- 
+                    disp(i1)
+                    disp(i2)
+                    disp(x(i1,i2))
+
                 else % for rest of the vehicles
                     % Update the initial conditions
                     xo(i1,i2) = x(i1-1,i2);
