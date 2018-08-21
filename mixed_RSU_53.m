@@ -11,7 +11,7 @@ close all;
 clc
 
 % define parameters
-dt=1;               % time step
+dt=0.5;               % time step
 vmax_2 = 13.4112;   % [m/s] ==> 30 MPH mr=main road, sr= secondary road
 vmax_mr = 13.4112;  % [m/s] ==> 30 MPH
 vmax_sr = 13.4112;   
@@ -794,62 +794,9 @@ for n=1:numel
         disp('main road');
         disp(x(n,i5(k)))
     end
-	
-    
-    
 
-for n=1:numel
-    %j=1;
-    for k1=1:length(i4)
-        if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
-            % it is CAV and on secondary road
-            % since secondary road x is changed to xm similarly other
-            % variables AUGUST 7
-            disp('case 1');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
-            hold on;
-        end
-        if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2) 
-            % it is MDV and on secondary road
-%             x2(n)= xm(n,i4(k1)); % Secondary road
-            % since secondary road x is changed to xm similarly other
-            % variables AUGUST 7
-             y2(n)= ym(n,i4(k));
-             u2(n)= um(n,i4(k));
-             v2(n)= vm(n,i4(k));          
-            disp('case 2');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
-            hold on; % changed hold off to hold on AUG 16 to match with prevous working code
-        end
-        disp('xm second road ');
-        disp(xm(n,i4(k1)))
-    end
-    for k=1:length(i5)
 
-        if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
-            % it is CAV and on main road
-            %x3(n)= x(n,i5(k)); % main road
-            %y3(n)= y(n,i5(k));
-            %u3(n)= u(n,i5(k));
-            %v3(n)= v(n,i5(k));
-            disp('case 3');
-            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
-            hold on;
-        end
-        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
-            % it is MDV an on main road
-            %x4(n)=x(n,i5(k)); % Main road
-            %y4(n)=y(n,i5(k));      
-            %u4(n)= u(n,i5(k));
-            %v4(n)= v(n,i5(k));
-            disp('case 4');
-            plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
-            
-            hold off;
-        end
-        disp('main road');
-        disp(x(n,i5(k)))
-    end
+    
 % 	
 % 	
 % 	this commented code has x and xm values assigned individually into
@@ -928,25 +875,8 @@ for n=1:numel
     drawnow
     pause(0.25)
     M(n)=getframe;
+  
 end
-    axis([0,600,-50,150]);
-    xlabel('x (m)');
-    ylabel('y (m)');
-    line([0 700],[111.5 111.5],'color','k','LineWidth',2)
-    line([0 400],[103.75 103.75],'color','k','LineWidth',2)
-    line([430 700],[103.75 103.75],'color','k','LineWidth',2)
-    line([400 400],[100 111.5],'color','r','LineWidth',2,'LineStyle','--')
-    line([430 430],[103.75 111.5],'color','r','LineWidth',2,'LineStyle','--')
-    
-    line([0 400],[3.75 103.75],'color','k','LineWidth',2)
-    line([0 430],[-4 103.75],'color','k','LineWidth',2)
-    grid on
-    title('Vehicles Trajectory');
-    drawnow
-    pause(0.25)
-    M(n)=getframe;
-
-
 
 % Display results as animation
 figure
