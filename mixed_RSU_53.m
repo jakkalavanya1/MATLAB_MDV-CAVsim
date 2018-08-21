@@ -35,7 +35,7 @@ numel = t_sim/dt;   % Time step
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
 R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[-125 -150],[3,4]};
+R2_xo = {[-125 -155 ],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -83,6 +83,8 @@ R2_ini(8,:)=s2(2).r2;% identifies if vehicle is CAV or MDV
 R12_ini = horzcat(R1_ini, R2_ini); % Concatenate the two matrices 
 R12_ini_h = sortrows(R12_ini',7)';
 
+manualFlag = false;     % new variable to check for manual vehicle AUG 19
+
 %               MANUAL VEHICLE             
 %========================================================================
 a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
@@ -93,23 +95,27 @@ a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
 for i = 1:length(R12_ini_h(2,:))
     if R12_ini_h(8,i)==4 % manual vehicle
         s(i)=R12_ini_h(2,i)
-        %j=j+1;
+        manualFlag = true; % flag set for manual vehicle AUG 19
+         %j=j+1;
     end
 end
 
-for i=1:length(s)
-    vf_model(i) = 12 + (14-12).*rand(1) % pre-defining v-final for MDV
-    %vf_model(i) = 12.6808
-    v1_model(i) = sqrt((vf_model(i))^2+2*a_model*s(i)); %initial velocity    
-    v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));  % velocity at RSU2  
-    v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400)); % velocity while entering merging
-    v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430)); % vel while leaving merging
-    tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;  % time while entering merging
-    tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model; % time while exit merging
-    t_headway(i)=tme_sr(i)-tm_sr(i); 
-    v1(1,i)=v1_model(i);
-end  
-v2_RSU2= v100_sr;
+if manualFlag==true     % checking for manual vehicle AUG 19
+    for i=1:length(s)
+        vf_model(i) = 12 + (14-12).*rand(1) % pre-defining v-final for MDV
+        %vf_model(i) = 12.6808
+        v1_model(i) = sqrt((vf_model(i))^2+2*a_model*s(i)); %initial velocity    
+        v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));  % velocity at RSU2  
+        v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400)); % velocity while entering merging
+        v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430)); % vel while leaving merging
+        tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;  % time while entering merging
+        tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model; % time while exit merging
+        t_headway(i)=tme_sr(i)-tm_sr(i); 
+        v1(1,i)=v1_model(i);
+    end  
+    v2_RSU2= v100_sr;
+end
+
 
 %% Initial conditions for each vehicle
 % this loop calculates the time to leave the intersection zone
@@ -434,11 +440,7 @@ for i1=2:numel
                     y(i1,i2)=107.625;
                 end
             end % for loop of MDV or CAV
-            disp('loop ending q');
-            disp(i1)
-            disp(i2)
-            disp(R12_ini_h(1,:))
-            q=q+1  % increment for q when there is a vehicle in main road
+            q=q+1;  % increment for q when there is a vehicle in main road
          end % for the if loop of main road
     end
 end
@@ -739,6 +741,7 @@ end
 % p=(length(i5)>=length(i4)):length(i5):length(i4) % ternary condition
 
 
+
 for n=1:numel
     %j=1;
     for k1=1:length(i4)
@@ -747,19 +750,19 @@ for n=1:numel
             % since secondary road x is changed to xm similarly other
             % variables AUGUST 7
             disp('case 1');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y' );
+            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
             hold on;
         end
         if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2) 
             % it is MDV and on secondary road
 %             x2(n)= xm(n,i4(k1)); % Secondary road
             % since secondary road x is changed to xm similarly other
-            % variables AUGUST 7
-%             y2(n)= ym(n,i4(k));
-%             u2(n)= um(n,i4(k));
-%             v2(n)= vm(n,i4(k));          
+%             % variables AUGUST 7
+%              y2(n)= ym(n,i4(k));
+%              u2(n)= um(n,i4(k));
+%              v2(n)= vm(n,i4(k));          
             disp('case 2');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k' );
+            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
             hold on; % changed hold off to hold on AUG 16 to match with prevous working code
         end
         disp('xm second road ');
@@ -774,7 +777,7 @@ for n=1:numel
             %u3(n)= u(n,i5(k));
             %v3(n)= v(n,i5(k));
             disp('case 3');
-            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g' );
+            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
             hold on;
         end
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
@@ -791,6 +794,123 @@ for n=1:numel
         disp('main road');
         disp(x(n,i5(k)))
     end
+	
+    
+    
+
+for n=1:numel
+    %j=1;
+    for k1=1:length(i4)
+        if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+            % it is CAV and on secondary road
+            % since secondary road x is changed to xm similarly other
+            % variables AUGUST 7
+            disp('case 1');
+            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
+            hold on;
+        end
+        if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2) 
+            % it is MDV and on secondary road
+%             x2(n)= xm(n,i4(k1)); % Secondary road
+            % since secondary road x is changed to xm similarly other
+            % variables AUGUST 7
+             y2(n)= ym(n,i4(k));
+             u2(n)= um(n,i4(k));
+             v2(n)= vm(n,i4(k));          
+            disp('case 2');
+            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
+            hold on; % changed hold off to hold on AUG 16 to match with prevous working code
+        end
+        disp('xm second road ');
+        disp(xm(n,i4(k1)))
+    end
+    for k=1:length(i5)
+
+        if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+            % it is CAV and on main road
+            %x3(n)= x(n,i5(k)); % main road
+            %y3(n)= y(n,i5(k));
+            %u3(n)= u(n,i5(k));
+            %v3(n)= v(n,i5(k));
+            disp('case 3');
+            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+            hold on;
+        end
+        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
+            % it is MDV an on main road
+            %x4(n)=x(n,i5(k)); % Main road
+            %y4(n)=y(n,i5(k));      
+            %u4(n)= u(n,i5(k));
+            %v4(n)= v(n,i5(k));
+            disp('case 4');
+            plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
+            
+            hold off;
+        end
+        disp('main road');
+        disp(x(n,i5(k)))
+    end
+% 	
+% 	
+% 	this commented code has x and xm values assigned individually into
+% 	x1,x2,x3,x4 respectively AUG 20
+% for n=1:numel
+%     %j=1;
+%     for k1=1:length(i4)
+%         if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+%             % it is CAV and on secondary road
+%             % since secondary road x is changed to xm similarly other
+%             % variables AUGUST 7
+%             x1(n)= xm(n,i5(k1)); % main road
+%             y1(n)= ym(n,i5(k1));
+%             u1(n)= um(n,i5(k1));
+%             v1(n)= vm(n,i5(k1));
+%             disp('case 1');
+%             plot(x1(n),y1(n),'ob','MarkerSize',5, 'MarkerFaceColor','y');
+%             hold on;
+%         end
+%         if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2) 
+%             % it is MDV and on secondary road
+% %             x2(n)= xm(n,i4(k1)); % Secondary road
+%             % since secondary road x is changed to xm similarly other
+%             % variables AUGUST 7
+%             x2(n)= xm(n,i4(k1));
+%             y2(n)= ym(n,i4(k1));
+%             u2(n)= um(n,i4(k1));
+%             v2(n)= vm(n,i4(k1));          
+%             disp('case 2');
+%             plot(x2(n),y2(n),'or','MarkerSize',5, 'MarkerFaceColor','k');
+%             hold on; % changed hold off to hold on AUG 16 to match with prevous working code
+%         end
+% %         disp('xm second road ');
+% %         disp(xm(n,i4(k1)))
+%     end
+%     for k=1:length(i5)
+% 
+%         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+%             % it is CAV and on main road
+%             x3(n)= x(n,i5(k)); % main road
+%             y3(n)= y(n,i5(k));
+%             u3(n)= u(n,i5(k));
+%             v3(n)= v(n,i5(k));
+%             disp('case 3');
+%             plot(x3(n),y3(n),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+%             hold on;
+%         end
+%         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
+%             % it is MDV an on main road
+%             x4(n)= x(n,i5(k)); % Main road
+%             y4(n)= y(n,i5(k));      
+%             u4(n)= u(n,i5(k));
+%             v4(n)= v(n,i5(k));
+%             disp('case 4');
+%             plot(x4(n),y4(n),'or','MarkerSize',5,  'MarkerFaceColor','r');
+%             
+%             hold off;
+%          end
+% %         disp('main road');
+% %         disp(x(n,i5(k)))
+%     end
    
     axis([0,600,-50,150]);
     xlabel('x (m)');
