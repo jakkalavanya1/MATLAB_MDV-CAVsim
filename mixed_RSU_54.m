@@ -733,46 +733,28 @@ end % end for for loop of time
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % i5 has been declared before AUG 7
+figure(1);
+set(gcf,'Render','OpenGL');
+
+
 for n=1:numel
     for k=1:length(i5)
 
         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
             % it is CAV and on main road
             disp('case 3');
-            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
-            hold on;
+            h1= plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+%             hold on;
         end
-        
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
             % it is MDV an on main road
             disp('case 4');
-            plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
+            h2= plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
             hold off;
-        end   
-        disp('main road');
-        disp(x(n,i5(k)))    % displays the x value every time on main road
+        end    
     end
-    
-    for k1=1:length(i4)
-        
-        if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
-            % it is CAV and on secondary road
-            disp('case 1');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
-            hold on;
-        end
-        
-        if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2) 
-            % it is MDV and on secondary road
-            %x2(n)= xm(n,i4(k1)); % Secondary road         
-            disp('case 2');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
-            hold on; % changed hold off to hold on AUG 16 to match with prevous working code
-        end
-        disp('xm second road ');
-        disp(xm(n,i4(k1)))
-    end
-   
+    set(h1,'EraseMode','Normal');
+    set(h2,'EraseMode','Normal');
     axis([0,600,-50,150]);
     xlabel('x (m)');
     ylabel('y (m)');
