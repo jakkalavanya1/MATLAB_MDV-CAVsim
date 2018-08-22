@@ -36,7 +36,7 @@ numel = t_sim/dt;   % Time step
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-R1_xo = {[-125 -150],[4,4]};             % 3= CAV(blue), 4= MANUAL(red)
+R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[-125 -155 ],[4,4]};
 road_1 = 'r1';
 road_2 = 'r2';
@@ -92,8 +92,7 @@ manualFlag = false;     % new variable to check for manual vehicle AUG 19
 a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
 % for loop to calculate MDV model values for more than one vehicle
 
-%s(1,:)=R2_xo; %distance travelled
-%j=1;
+
 for i = 1:length(R12_ini_h(2,:))
     if R12_ini_h(8,i)==4 % manual vehicle
         s(i)=R12_ini_h(2,i)
@@ -162,7 +161,7 @@ u=0*v;
 % % error=v2_predict-v2_RSU2
 
 i5=find(R12_ini_h(1,:)==1); % Identifies main road AUG 7
-q=1; % we define q as an index for i5 AUG 7
+q1=1; % we define q as an index for i5 AUG 7
 z=length(i5); % generalize (to check the previous car on same road) for any number of cars given AUG 20
 % Loop for the simulation time
 
@@ -171,8 +170,8 @@ z=length(i5); % generalize (to check the previous car on same road) for any numb
 for i1=2:numel
     % Loop for each vehicle
     for i2=1:length(R12_ini_h(1,:))
-        if mod(q,z+1)==0 % check q modulus 3 so that for alternate cars are taken in i5(q-1) AUG 19
-            q=1;
+        if mod(q1,z+1)==0 % check q modulus 3 so that for alternate cars are taken in i5(q-1) AUG 19
+            q1=1;
         end
         if R12_ini_h(1,i2)==1 % if main road and q is used to check if previous vehicle(CAV/MDV) on main road
             if R12_ini_h(8,i2)== 3  % if CAV
@@ -194,6 +193,13 @@ for i1=2:numel
                         xo(i1,i2) = x(i1,i2);
                         to(i1,i2) = t(i1,i2);
                         vo(i1,i2) = v(i1,i2);
+                    end
+                    % REAR END COLLISION CONSTRAINT--------------------
+                    if(i2~=1)
+                        
+                        if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                            v(i1,i2)=v(i1,i5(q1-1))-2;
+                        end
                     end
                 end
                 % Update variables and control on the control zone
@@ -249,7 +255,7 @@ for i1=2:numel
                         vo(i1,i2) = v(i1-1,i2);
                         vf(i1,i2) = vf(i1-1,i2);
                         to(i1,i2) = t(i1-1,i2);
-                        tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1));
+                        tf(i1,i2) = tf(i1,i5(q1-1)) + iz_length/vf(i1,i5(q1-1));
                         %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
                         %changed i2-1(any previous vehicle) to previous main
                         %road vehicle (i5(q-1)) AUG 7
@@ -295,12 +301,19 @@ for i1=2:numel
                             vo(i1,i2) = v(i1-1,i2);
                             vf(i1,i2) = vf(i1-1,i2);
                             to(i1,i2) = t(i1-1,i2);
-                            tf(i1,i2) = tf(i1,i5(q-1)) + iz_length/vf(i1,i5(q-1))-0.02;
+                            tf(i1,i2) = tf(i1,i5(q1-1)) + iz_length/vf(i1,i5(q1-1))-0.02;
                             %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
                             %changed i2-1(any previous vehicle) to previous main
                             %road vehicle (i5(q-1)) AUG 7
                         end
                         %                         q=q+1; % increase q to next vehicle number AUG 7
+                        % REAR END COLLISION CONSTRAINT--------------------
+                        if(i2~=1)
+                            
+                            if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                                v(i1,i2)=v(i1,i5(q1-1))-2;
+                            end
+                        end
                     end
                 end
                 
@@ -318,6 +331,14 @@ for i1=2:numel
                     x(i1,i2) = x(i1-1,i2)+ vf(i1,i2)*dt;
                     v(i1,i2) = vf(i1,i2);
                     u(i1,i2) = 0;
+                    
+                    % REAR END COLLISION CONSTRAINT--------------------
+                    if(i2~=1)
+                        
+                        if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                            v(i1,i2)=v(i1,i5(q1-1))-2;
+                        end
+                    end
                 end
                 
                 if x(i1,i2)<430 && R12_ini_h(1,i2)==2
@@ -344,14 +365,14 @@ for i1=2:numel
                     flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
                     % rear end collision constraint ---------------
                     if(i2~=1) % i2 is number of vehicle
-                        if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1)
-                            % i have removed  || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) this part of condition so
-                            % that it doesnt go into or condition AUGUST 7
-                            %if previous and current vehicle are on same road(main
-                            %road or secondary)
-                            if x(i1,i2)-x(i1,i2-1)<Ssafe
-                                v(i1,i2)=v(i1,i2-1)-2;
-                            end
+                        %                         if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1)
+                        % i have removed  || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) this part of condition so
+                        % that it doesnt go into or condition AUGUST 7
+                        %if previous and current vehicle are on same road(main
+                        %road or secondary)
+                        
+                        if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                            v(i1,i2)=v(i1,i5(q1-1))-2;
                         end
                     end
                     if x(i1,i2)>=0
@@ -392,7 +413,7 @@ for i1=2:numel
                         
                         vf(i1,i2) = vf_model(1,i2); % from distribution
                         to(i1,i2) = t(i1-1,i2);
-                        tf(i1,i2) = tf(i1,i5(q-1))+ iz_length/vf(i1,i5(q-1));
+                        tf(i1,i2) = tf(i1,i5(q1-1))+ iz_length/vf(i1,i5(q1-1));
                         
                         % Calculate constants. If to is too close to tf, control
                         % signal will go to infinity, so, the control should be
@@ -404,13 +425,13 @@ for i1=2:numel
                         v(i1,i2) = sqrt((vf(i1,i2)).^2-(2*u(i1,i2)*(430-xo(i1,i2))));
                         x(i1,i2) = xo(i1,i2)+v(i1,i2)*dt+(0.5*u(i1,i2)*dt^2);
                         % rear end collision constraint ---------------
-                        if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1) % || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2)
-                            if(i2~=1)
-                                if x(i1,i2)-x(i1,i2-1)<Ssafe
-                                    v(i1,i2)=v(i1,i2-1)-2;
-                                end
+                        %  if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1) % || (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2)
+                        if(i2~=1)
+                            if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                                v(i1,i2)=v(i1,i5(q1-1))-2;
                             end
                         end
+                        %                         end
                     end
                 end
                 %Update variables after control zone
@@ -429,20 +450,20 @@ for i1=2:numel
                 end
                 % rear end collision constraint ---------------
                 if(i2~=1)
-                    if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1)
-                        % added the if condition above here AUGUST 7
-                        if x(i1,i2)-x(i1,i2-1)<Ssafe
-                            v(i1,i2)=v(i1,i2-1)-2;
-                        end
+                    %                     if (R12_ini_h(1,i2-1)==1 && R12_ini_h(1,i2)==1)
+                    % added the if condition above here AUGUST 7
+                    if x(i1,i2)-x(i1,i5(q1-1))<Ssafe
+                        v(i1,i2)=v(i1,i5(q1-1))-2;
                     end
                 end
+                %                 end
                 if x(i1,i2)<430 && R12_ini_h(1,i2)==2
                     y(i1,i2)=x(i1,i2)*0.25;
                 else
                     y(i1,i2)=107.625;
                 end
             end % for loop of MDV or CAV
-            q=q+1;  % increment for q when there is a vehicle in main road
+            q1=q1+1;  % increment for q when there is a vehicle in main road
         end % for the if loop of main road
     end
 end
@@ -638,14 +659,14 @@ for i1=2:numel
                     flag(i1,i2) = 0; % this flag is to detect that the minimum speed value has been reached
                     % rear end collision constraint ---------------
                     % TWO IF LOOPS CAN BE REMOVED SINCE i2-1 is changed to i4(q2-1) AUG 21
-                    if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
-                        if(i2~=1)
-                            if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
-                                vm(i1,i2)=vm(i1,i4(q2-1))-2;
-                            end
+                    %                     if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
+                    if(i2~=2)
+                        if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
+                            vm(i1,i2)=vm(i1,i4(q2-1))-2;
                         end
                     end
-                    
+                    %                     end
+                    %
                     if xm(i1,i2)>=0
                         xmo(i1,i2) = xm(i1,i2);
                         tmo(i1,i2) = tm(i1,i2);
@@ -695,16 +716,16 @@ for i1=2:numel
                         um(i1,i2) = -0.05;
                         vm(i1,i2) = sqrt((vmf(i1,i2)).^2-(2*um(i1,i2)*(430-xmo(i1,i2))));
                         xm(i1,i2) = xmo(i1,i2)+vm(i1,i2)*dt+(0.5*um(i1,i2)*dt^2);
-                        % rear end collision constraint ---------------
-                        
+                        %                         % rear end collision constraint ---------------
+                        %
                         if(i2~=2)
-                            if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
-                                
-                                if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
-                                    vm(i1,i2)=vm(i1,i4(q2-1))-2;
-                                end
+                            %                             if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
+                            %
+                            if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
+                                vm(i1,i2)=vm(i1,i4(q2-1))-2;
                             end
                         end
+                        %                         end
                     end
                 end
                 % Update variables after control zone
@@ -723,14 +744,14 @@ for i1=2:numel
                 end
                 % rear end collision constraint ---------------
                 if(i2~=2)% changed i2=1 to i2=1 because in secondary road always the first vehicle is in second
-                    % column (i think based on distance also) in R12_ini_h
-                    % matrix
-                    if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
-                        if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
-                            vm(i1,i2)=vm(i1,i4(q2-1))-2;
-                        end
+                    %                     % column (i think based on distance also) in R12_ini_h
+                    %                     % matrix
+                    %                     if (R12_ini_h(1,i2-1)==2 && R12_ini_h(1,i2)==2) % added the constraint  of same road AUGUST 7th
+                    if xm(i1,i2)-xm(i1,i4(q2-1))<Ssafe
+                        vm(i1,i2)=vm(i1,i4(q2-1))-2;
                     end
                 end
+                %                 end
             end % for loop of MDV or CAV
             
             if xm(i1,i2)<430 && R12_ini_h(1,i2)==2
@@ -740,7 +761,7 @@ for i1=2:numel
                 % changed this if condition out of for loop of MDV,CAV
             end
             
-            q2=q2+1; 
+            q2=q2+1;
         end % for if loop of seconsdary road
     end % for loop of vehicles
 end % end for for loop of time
@@ -750,30 +771,15 @@ end % end for for loop of time
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % i5 has been declared before AUG 7
-figure(1);
-set(gcf,'Render','OpenGL');
-
-
 for n=1:numel
     for k=1:length(i5)
         
         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
             % it is CAV and on main road
             disp('case 3');
-            h1= plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
-%             hold on;
+            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+            hold on;
         end
-<<<<<<< HEAD
-        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
-            % it is MDV an on main road
-            disp('case 4');
-            h2= plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
-            hold off;
-        end    
-    end
-    set(h1,'EraseMode','Normal');
-    set(h2,'EraseMode','Normal');
-=======
         
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
             % it is MDV an on main road
@@ -806,7 +812,6 @@ for n=1:numel
         disp(xm(n,i4(k1)))
     end
     
->>>>>>> b31bc103ce0867f732db22e7d104cd354029a7f5
     axis([0,600,-50,150]);
     xlabel('x (m)');
     ylabel('y (m)');
