@@ -86,7 +86,7 @@ for i1=2:numel
             end
             if x(i1,i2)-x(i1,i2-1)<Ssafe
                 v(i1,i2)=v(i1,i2-1);
-                disp('case1')
+%                 disp('case1')
             end
         end
         y(i1,i2)=107.625;
