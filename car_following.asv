@@ -1,9 +1,7 @@
 % Simple car following model. Created on August 22, 2018
 % written by Lavanya Jakka
-
 clear all;
 clc
-clf
 
 xpos = [-75 -100 -125 -150];
 ypos = 100;
@@ -55,11 +53,10 @@ for i1=2:numel
             xf(i1,i2) = xf(i1-1,i2); 
             vo(i1,i2) = v(i1-1,i2);
             to(i1,i2) = i1-1; 
-            tf(i1,i2) = tf(i1-1,i2); 
+            tf(i1,i2) = tf(i1-1,i2); we enter the control zone
             
             t(i1,i2)=i1*dt;
             x(i1,i2) = x(i1-1,i2)+ vo(i1,i2)*dt;
-%           v(i1,i2) = vo(i1,i2)+2*to(i1,i2);
             v(i1,i2) = vo(i1,i2);
             u(i1,i2) =uavg;
             
@@ -69,24 +66,22 @@ for i1=2:numel
             xo(i1,i2) = x(i1-1,i2); % We want xo to be constant until reaching the control zone
             xf(i1,i2) = xf(i1-1,i2); % We want xf to be constant always
             vo(i1,i2) = v(i1-1,i2);
+            %                     vf(i1,i2) = vf(i1-1,i2);
             to(i1,i2) = i1-1; % We want to update to at each instant of time
             tf(i1,i2) = tf(i1-1,i2);% CHANGE
             
             
             t(i1,i2)=i1*dt;
             x(i1,i2) = x(i1-1,i2)+ vo(i1,i2)*dt;
-%           v(i1,i2) = vo(i1,i2);
+            v(i1,i2) = vo(i1,i2);
             u(i1,i2) =uavg;
             
             % Rear end collision constraint
-            
-            if x(i1,i2)-x(i1,i2-1)>Ssafe
-                v(i1,i2)=v(i1,i2-1)+2
-                disp('case2')
-            end
             if x(i1,i2)-x(i1,i2-1)<Ssafe
                 v(i1,i2)=v(i1,i2-1);
-                disp('case1')
+            end
+            if x(i1,i2)-x(i1,i2-1)>Ssafe
+                v(i1,i2)=v(i1,i2-1)+1;
             end
         end
         y(i1,i2)=107.625;
