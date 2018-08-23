@@ -317,7 +317,7 @@ for i1=2:numel
                     v(i1,i2) = vf(i1,i2);
                     u(i1,i2) = 0;
                 end
-
+ 
                 if x(i1,i2)<430 && R12_ini_h(1,i2)==2
                     y(i1,i2)=x(i1,i2)*0.25;
                 else
