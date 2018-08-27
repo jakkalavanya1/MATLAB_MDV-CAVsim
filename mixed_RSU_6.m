@@ -13,7 +13,7 @@ close all;
 clc
 
 % define parameters
-dt=1;               % time step
+dt=0.5;               % time step
 vmax_2 = 13.4112;   % [m/s] ==> 30 MPH mr=main road, sr= secondary road
 vmax_mr = 13.4112;  % [m/s] ==> 30 MPH
 vmax_sr = 13.4112;
@@ -37,7 +37,7 @@ numel = t_sim/dt;   % Time step
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
 R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
-R2_xo = {[-125 -155 ],[4,4]};
+R2_xo = {[-125 -155 ],[3,4]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
