@@ -771,7 +771,7 @@ end % end for for loop of time
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % i5 has been declared before AUG 7
-h2= plot(x(:,i5),y(:,i5),'or','MarkerSize',5,  'MarkerFaceColor','r'); % created plot using handler on AUG 27
+h2= plot(x(:,i5),y(:,i5),'or','MarkerSize',5,  'MarkerFaceColor','r');
 h1= plot(x(:,i5),y(:,i5),'ob','MarkerSize',5, 'MarkerFaceColor','g');
 
 for n=1:numel
@@ -792,7 +792,7 @@ for n=1:numel
         end
         
     end
-    % Previous code AUG 27
+    % Previous code AUG
     %
 %         for k=1:length(i5)
 %         
