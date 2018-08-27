@@ -750,15 +750,30 @@ end % end for for loop of time
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % i5 has been declared before AUG 7
+figure(1);
+set(gcf,'Render','OpenGL');
+
+
 for n=1:numel
     for k=1:length(i5)
         
         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
             % it is CAV and on main road
             disp('case 3');
-            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
-            hold on;
+            h1= plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+%             hold on;
         end
+<<<<<<< HEAD
+        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
+            % it is MDV an on main road
+            disp('case 4');
+            h2= plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
+            hold off;
+        end    
+    end
+    set(h1,'EraseMode','Normal');
+    set(h2,'EraseMode','Normal');
+=======
         
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
             % it is MDV an on main road
@@ -791,6 +806,7 @@ for n=1:numel
         disp(xm(n,i4(k1)))
     end
     
+>>>>>>> b31bc103ce0867f732db22e7d104cd354029a7f5
     axis([0,600,-50,150]);
     xlabel('x (m)');
     ylabel('y (m)');
