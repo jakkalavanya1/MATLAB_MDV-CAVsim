@@ -5,6 +5,7 @@
 
 % created on AUGUST 21
 % working on animation using handlers
+%  all input combinations are working but plot needs to be changed AUG 25
 %%
 % clears workspace, closes all figures, and clears command window
 clear;
@@ -773,43 +774,46 @@ i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 % i5 has been declared before AUG 7
 for n=1:numel
     for k=1:length(i5)
-        
+%         set(gcf,'Renderer','OpenGL'); 
         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
             % it is CAV and on main road
             disp('case 3');
-            plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+            line(x(n,i5(k)),y(n,i5(k)), 'Marker', '.', 'MarkerSize', 20, 'Color', 'b');
+%             h1=plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+%             set(h1,'EraseMode','normal');
             hold on;
+               
         end
         
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
             % it is MDV an on main road
             disp('case 4');
             plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
-            hold on;
+            hold off;
         end
-        
-        disp('main road');
-        disp(x(n,i5(k)))    % displays the x value every time on main road
-    end
-    
-    for k1=1:length(i4)
-        
-        if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
-            % it is CAV and on secondary road
-            disp('case 1');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
-            hold on;
-        end
-        
-        if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
-            % it is MDV and on secondary road
-            %x2(n)= xm(n,i4(k1)); % Secondary road
-            disp('case 2');
-            plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
-            hold on; % changed hold off to hold on AUG 16 to match with prevous working code
-        end
-        disp('xm second road ');
-        disp(xm(n,i4(k1)))
+%         
+%         disp('main road');
+%         disp(x(n,i5(k)))    % displays the x value every time on main road
+%     end
+%     
+%     for k1=1:length(i4)
+%         
+%         if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+%             % it is CAV and on secondary road
+%             disp('case 1');
+%             plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
+%             hold on;
+%         end
+%         
+%         if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
+%             % it is MDV and on secondary road
+%             %x2(n)= xm(n,i4(k1)); % Secondary road
+%             disp('case 2');
+%             plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
+%             hold on; % changed hold off to hold on AUG 16 to match with prevous working code
+%         end
+%         disp('xm second road ');
+%         disp(xm(n,i4(k1)))
     end
     
     axis([0,600,-50,150]);
