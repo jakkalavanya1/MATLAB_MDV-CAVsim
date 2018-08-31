@@ -5,6 +5,7 @@
 
 % created on AUGUST 21
 % working on animation using handlers
+%  all input combinations are working but plot needs to be changed AUG 25
 %%
 % clears workspace, closes all figures, and clears command window
 clear;
@@ -13,7 +14,7 @@ close all;
 clc
 
 % define parameters
-dt=0.5;               % time step
+dt=1;               % time step
 vmax_2 = 13.4112;   % [m/s] ==> 30 MPH mr=main road, sr= secondary road
 vmax_mr = 13.4112;  % [m/s] ==> 30 MPH
 vmax_sr = 13.4112;
@@ -36,8 +37,12 @@ numel = t_sim/dt;   % Time step
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
+<<<<<<< HEAD
 R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[-125 -155 ],[4,3]};
+=======
+R2_xo = {[-125 -155 ],[3,4]};
+>>>>>>> 740a4c88318d24d8850e644a06ec16d4d7137eab
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -775,12 +780,89 @@ end % end for for loop of time
 % we have x for main road, xm for secondary road
 % %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
+<<<<<<< HEAD
+% i5=find(R12_ini_h(1,:)==1); % Identifies main road
+% i5 has been declared before AUG 7
+for n=1:numel
+    for k=1:length(i5)
+%         set(gcf,'Renderer','OpenGL'); 
+        if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+            % it is CAV and on main road
+            disp('case 3');
+            line(x(n,i5(k)),y(n,i5(k)), 'Marker', '.', 'MarkerSize', 20, 'Color', 'b');
+%             h1=plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
+%             set(h1,'EraseMode','normal');
+            hold on;
+               
+        end
+        
+        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
+            % it is MDV an on main road
+            disp('case 4');
+            plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
+            hold off;
+        end
+%         
+%         disp('main road');
+%         disp(x(n,i5(k)))    % displays the x value every time on main road
+%     end
+%     
+%     for k1=1:length(i4)
+%         
+%         if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+%             % it is CAV and on secondary road
+%             disp('case 1');
+%             plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
+%             hold on;
+%         end
+%         
+%         if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
+%             % it is MDV and on secondary road
+%             %x2(n)= xm(n,i4(k1)); % Secondary road
+%             disp('case 2');
+%             plot(xm(n,i4(k1)),ym(n,i4(k1)),'or','MarkerSize',5, 'MarkerFaceColor','k');
+%             hold on; % changed hold off to hold on AUG 16 to match with prevous working code
+%         end
+%         disp('xm second road ');
+%         disp(xm(n,i4(k1)))
+    end
+    
+    axis([0,600,-50,150]);
+    xlabel('x (m)');
+    ylabel('y (m)');
+    line([0 700],[111.5 111.5],'color','k','LineWidth',2)
+    line([0 400],[103.75 103.75],'color','k','LineWidth',2)
+    line([430 700],[103.75 103.75],'color','k','LineWidth',2)
+    line([400 400],[100 111.5],'color','r','LineWidth',2,'LineStyle','--')
+    line([430 430],[103.75 111.5],'color','r','LineWidth',2,'LineStyle','--')
+    
+    line([0 400],[3.75 103.75],'color','k','LineWidth',2)
+    line([0 430],[-4 103.75],'color','k','LineWidth',2)
+    grid on
+    title('Vehicles Trajectory');
+    drawnow
+    pause(0.25)
+    M(n)=getframe;
+    
+=======
 % % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % % i5 has been declared before AUG 7
+<<<<<<< HEAD
 H= plot(t(:,i5),v(:,i5))
 for n=1:numel
     pause(0.5);
     set(H, 'XData',t(n,:),'YData', v(n, :));
+=======
+for k1=1:length(i5)
+    plot(t(:,i5(k1)),v(:,i5(k1)))
+    hold on;
+end
+figure(2);
+for k2=1:length(i4)
+    plot(tm(:,i4(k2)),vm(:,i4(k2)))
+    hold on;
+>>>>>>> edf15df113a2ac1b56463bdb16c13ba1bd762095
+>>>>>>> 740a4c88318d24d8850e644a06ec16d4d7137eab
 end
 % figure(2);
 % for k2=1:length(i4)
