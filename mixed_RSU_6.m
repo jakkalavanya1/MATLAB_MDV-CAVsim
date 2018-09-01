@@ -37,12 +37,15 @@ numel = t_sim/dt;   % Time step
 % R2_xo = {[ -125 -130],[3,4]};
 % R1_xo = {[-125 -130 -140],[3,4,3]};    % 3= CAV, 4= MANUAL %error
 % R2_xo = {[ -125 -150],[3,4]};
-<<<<<<< HEAD
+
 R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[-125 -155 ],[4,3]};
-=======
+
 R2_xo = {[-125 -155 ],[3,4]};
->>>>>>> 740a4c88318d24d8850e644a06ec16d4d7137eab
+
+R1_xo = {[-125 -150],[3,4]};             % 3= CAV(blue), 4= MANUAL(red)
+R2_xo = {[-125 -155 ],[3,4]};
+
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
@@ -843,16 +846,15 @@ for n=1:numel
     drawnow
     pause(0.25)
     M(n)=getframe;
-    
-=======
+
 % % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % % i5 has been declared before AUG 7
-<<<<<<< HEAD
+
 H= plot(t(:,i5),v(:,i5))
 for n=1:numel
     pause(0.5);
     set(H, 'XData',t(n,:),'YData', v(n, :));
-=======
+
 for k1=1:length(i5)
     plot(t(:,i5(k1)),v(:,i5(k1)))
     hold on;
@@ -861,14 +863,8 @@ figure(2);
 for k2=1:length(i4)
     plot(tm(:,i4(k2)),vm(:,i4(k2)))
     hold on;
->>>>>>> edf15df113a2ac1b56463bdb16c13ba1bd762095
->>>>>>> 740a4c88318d24d8850e644a06ec16d4d7137eab
+
 end
-% figure(2);
-% for k2=1:length(i4)
-%     plot(tm(:,i4(k2)),vm(:,i4(k2)))
-%     hold on;
-% end
 
 % h2= plot(x(:,i5),y(:,i5),'or','MarkerSize',5,  'MarkerFaceColor','r'); % created plot using handler on AUG 27
 % h1= plot(x(:,i5),y(:,i5),'ob','MarkerSize',5, 'MarkerFaceColor','g');
