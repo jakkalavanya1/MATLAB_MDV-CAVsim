@@ -776,14 +776,10 @@ end % end for for loop of time
 
 % velocity vs time plot
 
-
-
-
-
 % we have x for main road, xm for secondary road
 % %% Show animation
 i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
-<<<<<<< HEAD
+
 % i5=find(R12_ini_h(1,:)==1); % Identifies main road
 % i5 has been declared before AUG 7
 for n=1:numel
@@ -805,6 +801,7 @@ for n=1:numel
             plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
             hold off;
         end
+    end
 %         
 %         disp('main road');
 %         disp(x(n,i5(k)))    % displays the x value every time on main road
@@ -854,7 +851,7 @@ H= plot(t(:,i5),v(:,i5))
 for n=1:numel
     pause(0.5);
     set(H, 'XData',t(n,:),'YData', v(n, :));
-
+end
 for k1=1:length(i5)
     plot(t(:,i5(k1)),v(:,i5(k1)))
     hold on;
