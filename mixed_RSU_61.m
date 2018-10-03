@@ -1,3 +1,4 @@
+% cleaning the code
 % clears workspace, closes all figures, and clears command window
 clear;
 clear all
@@ -12,14 +13,13 @@ vmax_sr = 13.4112;  % mr=main road, sr= secondary road
 vavg_mr = 13.4112;  % [m/s] ==> 30 MPH
 vavg_sr = 13.4112;  % 30 MPH
 uavg = 0.3;         % [m/s^2] acceleration
-
 Ssafe = 3;          % [meters]safe distance
-% changed Ssafe value from 10 to 3 to avoid the velocity value going to -2
+                    % changed Ssafe value from 10 to 3 to avoid the velocity value going to -2
 cz_length = 400;    % Length of the control zone [m]
-iz_length = 30;     % Length of the merging zone [m], or desired intervehicular distance at the end of the control zone
+mz_length = 30;     % Length of the merging zone [m], or desired intervehicular distance at the end of the control zone
 dt=1;               % time step
 t_sim = 80;         % Simulation time [s]
-numel = t_sim/dt;   % Time step
+numel = t_sim/dt;   % number of iterations to make
 
 % Define initial position for the vehicles on each road
 R1_xo = {[-125 -150],[4,3]};    % 3= CAV(blue), 4= MANUAL(red)
@@ -29,101 +29,90 @@ road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
 s2 = struct(road_2,R2_xo);
 yo_mr = 107.625;                % initial position on y-axis
-
+%%
 % vehicles on main road
 % Identify main road as 1
-R1_ini(1,:)= ones(1,length(s1(1).r1));  % gets number of vehicles in road 1
+R1_ini(1,:)= ones(1,length(s1(1).r1));  % indicates 1 as the vehicles on main road
 R1_ini(2,:)=s1(2).r1;                   % identifies if vehicle is CAV or MDV
 R1_ini(3,:)= s1(1).r1;                  % takes only positions(X) of the vehicles on road 1
-R1_ini(4,:)= 107.625;
-R1_ini(5,:)= ones(1,length(s1(1).r1))*cz_length;
+R1_ini(4,:)= 107.625;                   % y position for main road
+R1_ini(5,:)= ones(1,length(s1(1).r1))*cz_length;  % control zone length= distance travelled till merging
 R1_ini(6,:)= ones(1,length(s1(1).r1))*vavg_mr;    % CHANGE % it is just like a reference value because it will be different for MDV
-R1_ini(7,:)= ones(1,length(s1(1).r1))*vmax_mr;    % t2iz: Time to intersection zone at constant speed = vavg
-R1_ini(8,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
+R1_ini(7,:)= ones(1,length(s1(1).r1))*vmax_mr;    % like a reference value
+R1_ini(8,:)= (cz_length-s1(1).r1)./R1_ini(6,:);   % t2iz: Time to merge zone at constant speed = vavg
 % gives approximate time to enter merging zone % its okay to consider
 % this because our problem is single lane. no overtakes so
 % definitely vehicles reach based onthe order of positions they start
 
-
 % vehicles on secondary road
-R2_ini(1,:)= ones(1,length(s2(1).r2)).*2;
-% xo: Initial position on x
-R2_ini(2,:)= s2(1).r2;
-% yo: Initial position on y
-R2_ini(3,:)= s2(1).r2*0.25;
-% xf: final position
-R2_ini(4,:)= ones(1,length(s2(1).r2))*(cz_length);
-% vo: Initial speed
-R2_ini(5,:)= ones(1,length(s2(1).r2))*vavg_sr;
-% vf: final speed
-R2_ini(6,:)= ones(1,length(s2(1).r2))*vmax_sr;
-% tf: time to reach intersection
-R2_ini(7,:)= (cz_length-s2(1).r2)./R2_ini(5,:);
-R2_ini(8,:)=s2(2).r2;% identifies if vehicle is CAV or MDV
-% Reorganize vehicles in hierarchy according to time to reach control zone
+R2_ini(1,:)= ones(1,length(s2(1).r2)).*2;   % indicates 2 as the vehicles on secondary road
+R2_ini(2,:)=s2(2).r2;                       % identifies if vehicle is CAV or MDV
+R2_ini(3,:)= s2(1).r2;                      % takes only positions(X) of the vehicles on road 2
+R2_ini(4,:)= s2(1).r2*0.25;                 % y position for secondary road                 
+R2_ini(5,:)= ones(1,length(s2(1).r2))*(cz_length);% control zone length
+R2_ini(6,:)= ones(1,length(s2(1).r2))*vavg_sr;    % vo: Initial speed
+R2_ini(7,:)= ones(1,length(s2(1).r2))*vmax_sr;    % vf: final speed
+R2_ini(8,:)= (cz_length-s2(1).r2)./R2_ini(5,:);   % tf: time to reach intersection
 
+% Reorganize vehicles in hierarchy according to time to reach control zone
 % Concatenate matrices
 R12_ini = horzcat(R1_ini, R2_ini); % Concatenate the two matrices
-R12_ini_h = sortrows(R12_ini',7)';
+R12_ini_h = sortrows(R12_ini',8)';
 
 manualFlag = false;     % new variable to check for manual vehicle AUG 19
+%% ----------------------MANUAL VEHICLE--------------------------------------
 
-%               MANUAL VEHICLE
-%========================================================================
 a_model=-0.05; %acceleration for manualy driven vehicle(MDV) on secondary road
 % for loop to calculate MDV model values for more than one vehicle
 
 
-for i = 1:length(R12_ini_h(2,:))
-    if R12_ini_h(8,i)==4 % manual vehicle
-        s(i)=R12_ini_h(2,i)
-        manualFlag = true; % flag set for manual vehicle AUG 19
-        %j=j+1;
+for i = 1:length(R12_ini_h(3,:))
+    if R12_ini_h(2,i)==4        % manual vehicle
+        s(i)=R12_ini_h(3,i);    % assigns the initial x positions into s
+        manualFlag = true;      % flag set for manual vehicle AUG 19
     end
 end
 
-if manualFlag==true     % checking for manual vehicle AUG 19
+if manualFlag==true     % checking for manual vehicle. if all are CAVs then there won't be error  AUG 19
     for i=1:length(s)
-        vf_model(i) = 12 + (14-12).*rand(1) % pre-defining v-final for MDV
+        vf_model(i) = 12 + (14-12).*rand(1);                % pre-defining v-final for MDV
         %vf_model(i) = 12.6808
         v1_model(i) = sqrt((vf_model(i))^2+2*a_model*s(i)); %initial velocity
-        v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));  % velocity at RSU2
-        v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400)); % velocity while entering merging
-        v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430)); % vel while leaving merging
-        tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;  % time while entering merging
-        tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model; % time while exit merging
+        v100_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*100));   % velocity at RSU2
+        v400_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*400));   % velocity while entering merging
+        v430_sr(i)=sqrt((v1_model(i)^2)+(2*a_model*430));   % vel while leaving merging
+        tm_sr(i)=(v400_sr(i)-v100_sr(i))/a_model;           % time while entering merging
+        tme_sr(i)=(v430_sr(i)-v100_sr(i))/a_model;          % time while exit merging
         t_headway(i)=tme_sr(i)-tm_sr(i);
         v1(1,i)=v1_model(i);
     end
     v2_RSU2= v100_sr;
 end
-
-
-%% Initial conditions for each vehicle
+% Initial conditions for each vehicle
 % this loop calculates the time to leave the intersection zone
-for i3=1:length(R12_ini_h(7,:))
+for i3=1:length(R12_ini_h(8,:))
     if i3==1
         % Since tf=time to reach intersection zone, the time to leave
         % intersection for the first vehicle is the time it takes to cross
         % the control zone at constant speed=vavg plus the time it takes
         % to cross the intersection zone at constant speed = vmax
-        R12_ini_h(9,i3) = R12_ini_h(4,i3)./R12_ini_h(5,i3) +(iz_length)./R12_ini_h(6,i3);
+        R12_ini_h(9,i3) = R12_ini_h(4,i3)./R12_ini_h(5,i3) +(mz_length)./R12_ini_h(7,i3);
     else
         % For the rest of the vehicles it is the time to leave the
         % intersection of the previous vehicle, plus the time it takes to
         % cross the intersection zone at constant speed vmax
-        R12_ini_h(9,i3) = R12_ini_h(9,i3-1)+(iz_length)./R12_ini_h(6,i3);
+        R12_ini_h(9,i3) = R12_ini_h(9,i3-1)+(mz_length)./R12_ini_h(7,i3);
     end
 end
 
 %% Define initial conditions
 
-xo=R12_ini_h(2,:); % This is still the initial position to start before the control zone
-yo=R12_ini_h(3,:);
-xf=R12_ini_h(4,:);
-vo=R12_ini_h(5,:);
-vf=R12_ini_h(6,:);
-to=0.*R12_ini_h(2,:);
+xo=R12_ini_h(3,:); % This is still the initial position to start before the control zone
+yo=R12_ini_h(4,:);
+xf=R12_ini_h(5,:);
+vo=R12_ini_h(6,:);
+vf=R12_ini_h(7,:);
+to=0.*R12_ini_h(3,:);
 tf=R12_ini_h(9,:);
 t2exit=R12_ini_h(9,:);
 t=zeros(1,length(tf));
@@ -155,7 +144,7 @@ for i1=2:numel
             q1=1;
         end
         if R12_ini_h(1,i2)==1 % if main road and q is used to check if previous vehicle(CAV/MDV) on main road
-            if R12_ini_h(8,i2)== 3  % if CAV
+            if R12_ini_h(2,i2)== 3  % if CAV
                 % Update variables before control zone
                 if x(i1-1,i2)<0
                     % Update initial conditions:
@@ -236,7 +225,7 @@ for i1=2:numel
                         vo(i1,i2) = v(i1-1,i2);
                         vf(i1,i2) = vf(i1-1,i2);
                         to(i1,i2) = t(i1-1,i2);
-                        tf(i1,i2) = tf(i1,i5(q1-1)) + iz_length/vf(i1,i5(q1-1));
+                        tf(i1,i2) = tf(i1,i5(q1-1)) + mz_length/vf(i1,i5(q1-1));
                         %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1);
                         %changed i2-1(any previous vehicle) to previous main
                         %road vehicle (i5(q-1)) AUG 7
@@ -282,7 +271,7 @@ for i1=2:numel
                             vo(i1,i2) = v(i1-1,i2);
                             vf(i1,i2) = vf(i1-1,i2);
                             to(i1,i2) = t(i1-1,i2);
-                            tf(i1,i2) = tf(i1,i5(q1-1)) + iz_length/vf(i1,i5(q1-1))-0.02;
+                            tf(i1,i2) = tf(i1,i5(q1-1)) + mz_length/vf(i1,i5(q1-1))-0.02;
                             %tf(i1,i2) = tf(i1,i2-1) + iz_length/vf(i1,i2-1)-0.02;
                             %changed i2-1(any previous vehicle) to previous main
                             %road vehicle (i5(q-1)) AUG 7
@@ -328,7 +317,7 @@ for i1=2:numel
                     y(i1,i2)=107.625;
                 end
             end
-            if R12_ini_h(8,i2)== 4 % if MDV  ------------------------------------
+            if R12_ini_h(2,i2)== 4 % if MDV  ------------------------------------
                 %disp(x(i1-1,i2))
                 if x(i1-1,i2)<0
                     % Update initial conditions:
@@ -394,7 +383,7 @@ for i1=2:numel
                         
                         vf(i1,i2) = vf_model(1,i2); % from distribution
                         to(i1,i2) = t(i1-1,i2);
-                        tf(i1,i2) = tf(i1,i5(q1-1))+ iz_length/vf(i1,i5(q1-1));
+                        tf(i1,i2) = tf(i1,i5(q1-1))+ mz_length/vf(i1,i5(q1-1));
                         
                         % Calculate constants. If to is too close to tf, control
                         % signal will go to infinity, so, the control should be
@@ -451,12 +440,12 @@ end
 
 
 %=========================================================
-xmo=R12_ini_h(2,:); % This is still the initial position to start before the control zone
-ymo=R12_ini_h(3,:);
-xmf=R12_ini_h(4,:);
-vmo=R12_ini_h(5,:);
-vmf=R12_ini_h(6,:);
-tmo=0.*R12_ini_h(2,:);
+xmo=R12_ini_h(3,:); % This is still the initial position to start before the control zone
+ymo=R12_ini_h(4,:);
+xmf=R12_ini_h(5,:);
+vmo=R12_ini_h(6,:);
+vmf=R12_ini_h(7,:);
+tmo=0.*R12_ini_h(3,:);
 tmf=R12_ini_h(9,:);
 tm2exit=R12_ini_h(9,:);
 tm=zeros(1,length(tmf));
@@ -481,7 +470,7 @@ for i1=2:numel
             q2=1;
         end
         if R12_ini_h(1,i2)==2 % if secondary road
-            if R12_ini_h(8,i2)== 3 % if CAV
+            if R12_ini_h(2,i2)== 3 % if CAV
                 % Update variables before control zone
                 if xm(i1-1,i2)<0
                     % Update initial conditions:
@@ -556,7 +545,7 @@ for i1=2:numel
                         vmo(i1,i2) = vm(i1-1,i2);
                         vmf(i1,i2) = vmf(i1-1,i2);
                         tmo(i1,i2) = tm(i1-1,i2);
-                        tmf(i1,i2) = tmf(i1,i4(q2-1)) + iz_length/vmf(i1,i4(q2-1));
+                        tmf(i1,i2) = tmf(i1,i4(q2-1)) + mz_length/vmf(i1,i4(q2-1));
                         % tmf(i1,i2) = tmf(i1,i2-1) +
                         % iz_length/vmf(i1,i2-1);--------------
                         % Calculate constants. If to is too close to tf, control
@@ -595,7 +584,7 @@ for i1=2:numel
                             vmo(i1,i2) = vm(i1-1,i2);
                             vmf(i1,i2) = vmf(i1-1,i2);
                             tmo(i1,i2) = tm(i1-1,i2);
-                            tmf(i1,i2) = tmf(i1,i4(q2-1)) + iz_length/vmf(i1,i4(q2-1))-0.02;
+                            tmf(i1,i2) = tmf(i1,i4(q2-1)) + mz_length/vmf(i1,i4(q2-1))-0.02;
                             %tmf(i1,i2) = tmf(i1,i2-1) +
                             %iz_length/vmf(i1,i2-1)-0.02;------------
                         end
@@ -622,7 +611,7 @@ for i1=2:numel
                     ym(i1,i2)=107.625;
                 end
             end
-            if R12_ini_h(8,i2)== 4% if MDV  ------------------------------------
+            if R12_ini_h(2,i2)== 4% if MDV  ------------------------------------
                 if xm(i1-1,i2)<0
                     % Update initial conditions:
                     xmo(i1,i2) = xm(i1-1,i2); % We want xo to be constant until reaching the control zone
@@ -686,7 +675,7 @@ for i1=2:numel
                         
                         vmf(i1,i2) = vf_model(1,i2); % from distribution
                         tmo(i1,i2) = tm(i1-1,i2);
-                        tmf(i1,i2) = tmf(i1,i4(q2-1))+ iz_length/vmf(i1,i4(q2-1));
+                        tmf(i1,i2) = tmf(i1,i4(q2-1))+ mz_length/vmf(i1,i4(q2-1));
                         
                         % Calculate constants. If to is too close to tf, control
                         % signal will go to infinity, so, the control should be
@@ -758,7 +747,7 @@ i4=find(R12_ini_h(1,:)==2); % Identifies secondary road
 for n=1:numel
     for k=1:length(i5)
         % set(gcf,'Renderer','OpenGL');
-        if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+        if (R12_ini_h(2,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
             % it is CAV and on main road
             disp('case 3');
             line(x(n,i5(k)),y(n,i5(k)), 'Marker', '.', 'MarkerSize', 20, 'Color', 'b');
@@ -768,7 +757,7 @@ for n=1:numel
             
         end
         
-        if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
+        if (R12_ini_h(2,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
             % it is MDV an on main road
             disp('case 4');
             plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
@@ -782,14 +771,14 @@ for n=1:numel
     
     for k1=1:length(i4)
         
-        if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+        if (R12_ini_h(2,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
             % it is CAV and on secondary road
             disp('case 1');
             plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
             hold on;
         end
         
-        if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
+        if (R12_ini_h(2,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
             % it is MDV and on secondary road
             %x2(n)= xm(n,i4(k1)); % Secondary road
             disp('case 2');
@@ -845,13 +834,13 @@ end
 % for n=1:numel
 %     for k=1:length(i5)
 %
-%         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+%         if (R12_ini_h(2,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
 %             % it is CAV and on main road
 %             disp('case 3');
 %             set(h1,'XData',x(n,i5(k)),'YData',y(n,i5(k))) ;
 %             drawnow;
 %         end
-%         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
+%         if (R12_ini_h(2,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
 %             % it is MDV an on main road
 %             disp('case 4');
 %             set(h2,'XData',x(n,i5(k)),'YData',y(n,i5(k))) ;
@@ -864,14 +853,14 @@ end
 %     %
 % %         for k=1:length(i5)
 % %
-% %         if (R12_ini_h(8,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
+% %         if (R12_ini_h(2,i5(k)) == 3 && R12_ini_h(1,i5(k))==1)
 % %             % it is CAV and on main road
 % %             disp('case 3');
 % %             plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
 % %             hold on;
 % %         end
 % %
-% %         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
+% %         if (R12_ini_h(2,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
 % %             % it is MDV an on main road
 % %             disp('case 4');
 % %             plot(x(n,i5(k)),y(n,i5(k)),'or','MarkerSize',5,  'MarkerFaceColor','r');
@@ -884,14 +873,14 @@ end
 % %
 % %     for k1=1:length(i4)
 % %
-% %         if (R12_ini_h(8,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
+% %         if (R12_ini_h(2,i4(k1)) == 3 && R12_ini_h(1,i4(k1))==2)
 % %             % it is CAV and on secondary road
 % %             disp('case 1');
 % %             plot(xm(n,i4(k1)),ym(n,i4(k1)),'ob','MarkerSize',5, 'MarkerFaceColor','y');
 % %             hold on;
 % %         end
 % %
-% %         if (R12_ini_h(8,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
+% %         if (R12_ini_h(2,i4(k1)) == 4 && R12_ini_h(1,i4(k1))==2)
 % %             % it is MDV and on secondary road
 % %             %x2(n)= xm(n,i4(k1)); % Secondary road
 % %             disp('case 2');
