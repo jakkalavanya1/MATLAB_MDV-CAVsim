@@ -1,64 +1,48 @@
-% mixed traffic scenario-WORKING
-% 2 CAVs and one MDV on each road
-% need to add rear end collision constraint for manual vehicles
-% CAVs should sense rear end collision with MDV
-
-% created on AUGUST 21
-% working on animation using handlers
-%  all input combinations are working but plot needs to be changed AUG 25
-%%
 % clears workspace, closes all figures, and clears command window
 clear;
 clear all
 close all;
 clc
-
 % define parameters
-dt=1;               % time step
-vmax_2 = 13.4112;   % [m/s] ==> 30 MPH mr=main road, sr= secondary road
+
+vmin_mr = 0; % [m/s]
+vmin_sr = 0; 
 vmax_mr = 13.4112;  % [m/s] ==> 30 MPH
-vmax_sr = 13.4112;
+vmax_sr = 13.4112;  % mr=main road, sr= secondary road
 vavg_mr = 13.4112;  % [m/s] ==> 30 MPH
 vavg_sr = 13.4112;  % 30 MPH
+uavg = 0.3;         % [m/s^2] acceleration
+
 Ssafe = 3;          % [meters]safe distance
 % changed Ssafe value from 10 to 3 to avoid the velocity value going to -2
-vmin_mr = 0; % [m/s]
-vmin_sr = 0;
-
-uavg = 0.3;         % [m/s^2] acceleration
 cz_length = 400;    % Length of the control zone [m]
 iz_length = 30;     % Length of the merging zone [m], or desired intervehicular distance at the end of the control zone
+dt=1;               % time step
 t_sim = 80;         % Simulation time [s]
-yo_mr = 107.625;    % initial position on y-axis
 numel = t_sim/dt;   % Time step
 
 % Define initial position for the vehicles on each road
-R1_xo = {[-125 -150],[4,3]};             % 3= CAV(blue), 4= MANUAL(red)
+R1_xo = {[-125 -150],[4,3]};    % 3= CAV(blue), 4= MANUAL(red)
 R2_xo = {[-125 -155 ],[4,3]};
 road_1 = 'r1';
 road_2 = 'r2';
 s1 = struct(road_1,R1_xo);
 s2 = struct(road_2,R2_xo);
+yo_mr = 107.625;                % initial position on y-axis
 
 % vehicles on main road
 % Identify main road as 1
-R1_ini(1,:)= ones(1,length(s1(1).r1)); % gets number of vehicles in road 1
-% xo: Initial position on x
-R1_ini(2,:)= s1(1).r1;                 % takes only positions(X) of the vehicles on road 1
-% yo: Initial position on y
-R1_ini(3,:)= 107.625;
-% xf: Initial position
-R1_ini(4,:)= ones(1,length(s1(1).r1))*cz_length;
-%vo: Initial speed
-R1_ini(5,:)= ones(1,length(s1(1).r1))*vavg_mr; % CHANGE % it is just like a reference value because it will be different for MDV
-% vf: final speed
-R1_ini(6,:)= ones(1,length(s1(1).r1))*vmax_mr; % CHANGE
-% t2iz: Time to intersection zone at constant speed = vavg
-R1_ini(7,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
+R1_ini(1,:)= ones(1,length(s1(1).r1));  % gets number of vehicles in road 1
+R1_ini(2,:)=s1(2).r1;                   % identifies if vehicle is CAV or MDV
+R1_ini(3,:)= s1(1).r1;                  % takes only positions(X) of the vehicles on road 1
+R1_ini(4,:)= 107.625;
+R1_ini(5,:)= ones(1,length(s1(1).r1))*cz_length;
+R1_ini(6,:)= ones(1,length(s1(1).r1))*vavg_mr;    % CHANGE % it is just like a reference value because it will be different for MDV
+R1_ini(7,:)= ones(1,length(s1(1).r1))*vmax_mr;    % t2iz: Time to intersection zone at constant speed = vavg
+R1_ini(8,:)= (cz_length-s1(1).r1)./R1_ini(5,:); % CHANGES
 % gives approximate time to enter merging zone % its okay to consider
 % this because our problem is single lane. no overtakes so
 % definitely vehicles reach based onthe order of positions they start
-R1_ini(8,:)=s1(2).r1; % identifies if vehicle is CAV or MDV
 
 
 % vehicles on secondary road
