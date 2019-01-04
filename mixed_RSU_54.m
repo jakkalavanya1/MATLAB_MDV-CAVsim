@@ -763,7 +763,7 @@ for n=1:numel
             h1= plot(x(n,i5(k)),y(n,i5(k)),'ob','MarkerSize',5, 'MarkerFaceColor','g');
 %             hold on;
         end
-<<<<<<< HEAD
+% <<<<<<< HEAD
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1) 
             % it is MDV an on main road
             disp('case 4');
@@ -773,7 +773,7 @@ for n=1:numel
     end
     set(h1,'EraseMode','Normal');
     set(h2,'EraseMode','Normal');
-=======
+% =======
         
         if (R12_ini_h(8,i5(k)) == 4 && R12_ini_h(1,i5(k))==1)
             % it is MDV an on main road
@@ -806,7 +806,7 @@ for n=1:numel
         disp(xm(n,i4(k1)))
     end
     
->>>>>>> b31bc103ce0867f732db22e7d104cd354029a7f5
+% >>>>>>> b31bc103ce0867f732db22e7d104cd354029a7f5
     axis([0,600,-50,150]);
     xlabel('x (m)');
     ylabel('y (m)');
@@ -824,7 +824,7 @@ for n=1:numel
     pause(0.25)
     M(n)=getframe;
     
-end
+% end
 
 % Display results as animation
 figure
